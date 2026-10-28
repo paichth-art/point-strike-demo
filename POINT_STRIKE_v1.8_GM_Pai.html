@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>POINT STRIKE v1.8 — Full Update</title>
+<style>
+:root{--cyan:#74f5ff;--red:#ff596a;--blue:#58b9ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111c;color:#f2fbff;font-family:system-ui,-apple-system,Arial,sans-serif;touch-action:none}
+#game{display:block;width:100%;height:100%}
+#hud{position:fixed;inset:0;pointer-events:none;text-shadow:0 2px 5px #000}
+.top{position:absolute;top:env(safe-area-inset-top,8px);left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.pill{background:#07131de8;border:1px solid #7295a7a8;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:800;line-height:1.35}
+#teamScore{min-width:120px;text-align:center}
+.red{color:var(--red)}.blue{color:var(--blue)}
+#healthbar{height:6px;width:100px;background:#283b48;border-radius:8px;overflow:hidden;margin-top:4px}
+#healthfill{height:100%;width:100%;background:#6dffc4}
+#crosshair{position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%);opacity:.95}
+#crosshair:before,#crosshair:after{content:"";position:absolute;background:#eaffff;box-shadow:0 0 4px #00d9ff}
+#crosshair:before{left:9px;top:1px;width:2px;height:18px}#crosshair:after{left:1px;top:9px;width:18px;height:2px}
+#centerMsg{position:absolute;left:50%;top:39%;transform:translateX(-50%);text-align:center;font-size:13px;font-weight:800;color:#dffaff;white-space:nowrap}
+#hint{position:absolute;right:10px;top:90px;font-size:10px;color:#d7edf7bb;text-align:right}
+#joy{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border:2px solid #ffffff66;border-radius:50%;background:#07111d8a;z-index:4;touch-action:none}
+#nub{position:absolute;left:33px;top:33px;width:46px;height:46px;border-radius:50%;background:#dce6ef77;border:1px solid #fff9}
+.control{position:fixed;z-index:5;border:2px solid #ffffffa0;color:#fff;font-weight:900;touch-action:none;user-select:none;display:flex;align-items:center;justify-content:center}
+#fire{right:18px;bottom:calc(28px + env(safe-area-inset-bottom,0px));width:82px;height:82px;border-radius:50%;background:#b72b43dd;border-color:#ff8b9a;font-size:14px}
+#reload{right:108px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:#102b40e8;border-color:#80dfff;font-size:10px}
+#dash{right:25px;bottom:calc(120px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:#147b86e8;border-color:#8dfaff;font-size:10px}
+#pause{position:fixed;right:10px;top:calc(48px + env(safe-area-inset-top,0px));z-index:6;border:1px solid #8adce7;background:#07131de8;color:#eaffff;border-radius:8px;padding:7px 10px;font-weight:900}
+#toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#07131df2;border:1px solid #75eaf3;border-radius:8px;padding:9px 12px;font-weight:800;font-size:13px;display:none;z-index:8;white-space:nowrap}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 35%,#1c4862ee,#06101cf5 72%);text-align:center}
+.card{width:min(440px,100%);background:#07131df0;border:1px solid #4f8ca5;border-radius:16px;padding:22px;box-shadow:0 12px 60px #0009}
+h1{margin:0 0 6px;font-size:27px;letter-spacing:2px;color:var(--cyan)}
+.sub{color:#b9d0dc;font-size:13px;line-height:1.55}
+.action{border:0;border-radius:9px;background:linear-gradient(#a8fbff,#3fb6c6);color:#06131b;padding:12px 22px;margin-top:14px;font-weight:1000;font-size:15px}
+#rotate{display:none;position:fixed;top:7px;left:50%;transform:translateX(-50%);z-index:7;font-size:10px;color:#bdfaff;background:#07131dcc;padding:4px 8px;border-radius:6px}
+@media(orientation:portrait){#rotate{display:block}}
+.hidden{display:none!important}
+
+/* Point Blank-inspired arsenal lobby */
+#game{visibility:hidden}
+#arsenal{position:fixed;inset:0;z-index:9;overflow:auto;background:#070809;color:#f0eeee;font-family:Arial,Tahoma,sans-serif;touch-action:pan-y}
+#arsenal *{box-sizing:border-box}
+.a-shell{min-height:100%;padding:5px;background:linear-gradient(135deg,#24282b,#070809 35%,#171a1c);border:3px solid #596168;box-shadow:inset 0 0 0 2px #050606}
+.a-top{display:flex;align-items:center;gap:6px;min-height:55px;padding:5px 8px;background:linear-gradient(#3b4146,#0c0e10);border-bottom:4px solid #52585d}
+.a-logo{font-size:clamp(17px,2.8vw,30px);font-weight:1000;font-style:italic;letter-spacing:-1px;white-space:nowrap;text-shadow:2px 2px #000;padding-right:10px;border-right:4px solid #a42e25}
+.a-logo em{color:#e63b2d;font-style:normal}
+.a-nav{padding:10px 12px;border:2px solid #62696e;background:linear-gradient(#565d62,#171a1d);font-size:clamp(10px,1.3vw,15px);font-weight:900;white-space:nowrap;color:#eee}
+.a-nav.active{background:linear-gradient(#ffb52b,#a84805);border-color:#d88b2b}
+.a-icons{margin-left:auto;display:flex;gap:5px}
+.a-icons button{width:30px;height:30px;border-radius:50%;border:2px solid #737a7f;background:#101214;color:#eee;font-size:16px}
+.a-layout{display:grid;grid-template-columns:minmax(190px,26%) 1fr;gap:8px;margin-top:8px}
+.a-panel{border:3px solid #51585e;background:linear-gradient(135deg,#22272a,#080a0b 55%,#191d20);box-shadow:inset 0 0 0 2px #090a0b;min-width:0}
+.a-profile{padding:9px;background:repeating-linear-gradient(0deg,transparent 0 33px,#ffffff04 34px 35px),linear-gradient(90deg,#080a0b,#191c1e)}
+.a-name{font-size:19px;padding:4px 0 7px;border-bottom:2px solid #9b3b23;margin-bottom:7px}
+.a-stats{display:grid;grid-template-columns:1fr auto 1fr auto;gap:3px 5px;font-size:11px;color:#c4c8cb}.a-stats b{font-weight:400;color:#eee}
+.a-avatar{height:clamp(230px,38vh,390px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 80%,#34393c,transparent 56%)}
+.a-avatar:before{content:"";position:absolute;bottom:10px;width:75%;height:12px;border-radius:50%;background:#0008;filter:blur(7px)}
+.a-operator{position:relative;width:105px;height:300px;filter:drop-shadow(0 5px 5px #000);transform:scale(.94)}
+.a-head{position:absolute;top:9px;left:39px;width:29px;height:34px;border-radius:45%;background:linear-gradient(90deg,#77513c,#d4a27d,#704833);border:2px solid #242322}
+.a-helmet{position:absolute;top:1px;left:30px;width:47px;height:23px;border-radius:55% 55% 12% 12%;background:linear-gradient(#d3b55c,#4a482d);border:3px solid #20211c;z-index:2}
+.a-goggle{position:absolute;top:14px;left:36px;width:35px;height:10px;background:#b6a04d;border:3px solid #25292a;border-radius:6px;z-index:3}
+.a-neck{position:absolute;top:40px;left:44px;width:18px;height:16px;background:#a47658}
+.a-body{position:absolute;top:51px;left:20px;width:65px;height:88px;background:linear-gradient(90deg,#272d26,#555948,#222720);clip-path:polygon(18% 0,82% 0,100% 20%,87% 100%,12% 100%,0 20%);border:2px solid #171916}
+.a-shirt{position:absolute;top:65px;left:35px;width:36px;height:43px;background:linear-gradient(#b64b32,#54291f);clip-path:polygon(15% 0,85% 0,100% 100%,0 100%)}
+.a-arm{position:absolute;top:58px;width:17px;height:88px;background:linear-gradient(90deg,#262c24,#666a51,#222720);border:2px solid #171916;border-radius:8px}.a-arm.left{left:10px;transform:rotate(13deg)}.a-arm.right{right:7px;transform:rotate(-13deg)}
+.a-belt{position:absolute;top:131px;left:24px;width:58px;height:9px;background:#171a16;border:2px solid #6b5b3f}
+.a-shorts{position:absolute;top:138px;left:23px;width:60px;height:45px;background:linear-gradient(90deg,#35434b,#78818a,#2b353d);clip-path:polygon(0 0,100% 0,90% 100%,56% 100%,48% 40%,38% 100%,8% 100%)}
+.a-leg{position:absolute;top:176px;width:20px;height:96px;background:linear-gradient(90deg,#33372a,#79765b,#25271f);border:2px solid #161814;border-radius:4px}.a-leg.l{left:28px}.a-leg.r{left:59px}
+.a-boot{position:absolute;top:264px;width:28px;height:30px;background:linear-gradient(#555440,#171916);border-bottom:5px solid #080908;border-radius:4px 8px 3px 3px}.a-boot.l{left:20px}.a-boot.r{left:57px}
+.a-gun{position:absolute;top:118px;right:1px;width:9px;height:100px;background:linear-gradient(90deg,#111,#666,#111);border:2px solid #080909;transform:rotate(-4deg)}
+.a-money{display:grid;grid-template-columns:1fr auto;gap:5px;padding:9px;font-size:12px;background:#0a0c0d}.a-money b{color:#f3c16c;font-weight:500}.a-orange{background:linear-gradient(#ff8b27,#9e360b);border:2px solid #f79a48;padding:5px 7px;color:white;font-weight:bold}
+.a-right{padding:8px;display:flex;flex-direction:column}
+.a-tabs{display:flex;gap:4px;border-bottom:3px solid #e65b16;margin-bottom:6px}.a-tab{flex:1;padding:10px 3px;background:linear-gradient(#555b60,#171a1c);border:1px solid #777;color:#eee;font-size:clamp(12px,1.5vw,18px);font-weight:900}.a-tab.active{background:linear-gradient(#ff741e,#a33a0b)}
+.a-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:6px}.a-filter{padding:7px 1px;background:linear-gradient(#171a1c,#050606);border:1px solid #666d72;color:#ddd;font-size:clamp(9px,1vw,12px)}.a-filter.active{border:2px solid #f66b1c;color:#ffd18a}
+.a-content{display:grid;grid-template-columns:minmax(112px,26%) 1fr;gap:6px;flex:1}
+.a-equipment{display:flex;flex-direction:column;gap:5px}.a-equip{min-height:clamp(74px,12vh,112px);background:linear-gradient(135deg,#493b30,#151413);border:3px solid #51453a;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}.a-equip .label{font-size:11px}.a-equip .icon{font-size:clamp(21px,3vw,35px);filter:drop-shadow(0 3px 2px #000)}
+.a-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;align-content:start}
+.a-weapon{min-width:0;border:2px solid #454b50;background:linear-gradient(145deg,#464b50,#1a1d1f 70%);cursor:pointer;overflow:hidden}.a-weapon.selected{border-color:#ff8a24;box-shadow:0 0 8px #ff6a1677}
+.a-gunpic{height:clamp(65px,12vh,126px);display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,#ffffff08 0 2px,transparent 2px 7px),linear-gradient(#353a3e,#24282b);font-size:clamp(22px,3.6vw,43px);text-shadow:0 4px 4px #000;white-space:nowrap}
+.a-gunpic .shape{display:block;transform:scaleX(1.2) rotate(-7deg);color:#171a1c;text-shadow:1px 1px #a4a8a7,-2px -2px #111}
+.a-wname{text-align:center;font-size:clamp(9px,1.15vw,14px);padding:4px 1px;color:#ffd36e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-meta{display:flex;align-items:center;gap:3px;padding:0 4px 4px}.a-bar{height:7px;background:#0b0d0c;border:1px solid #555;flex:1}.a-bar i{display:block;height:100%;background:repeating-linear-gradient(90deg,#6cdb29 0 5px,#27941d 5px 7px)}
+.a-footer{display:flex;gap:4px;padding:5px;background:#101214;border:2px solid #41484e;margin-top:7px;flex-wrap:wrap}.a-footer button{padding:7px 10px;background:linear-gradient(#343a3f,#101214);border:1px solid #555;color:#eee;font-size:11px}.a-footer button.active{border-color:#f66b1c;color:#ffc17b}
+.a-status{display:flex;justify-content:space-between;gap:8px;margin-top:6px;background:#252a2e;border:2px solid #555e65;padding:7px 9px;font-size:10px;color:#ccc}.a-status span:last-child{color:#ffd342}
+@media(max-width:640px){.a-shell{padding:3px}.a-top{flex-wrap:wrap}.a-logo{font-size:17px}.a-nav{padding:8px 6px;font-size:10px}.a-layout{grid-template-columns:1fr}.a-profile{display:grid;grid-template-columns:1fr 110px;gap:5px;padding:6px}.a-info{grid-column:1}.a-avatar{grid-column:2;grid-row:1/3;height:205px}.a-operator{transform:scale(.67)}.a-money{grid-column:1/-1}.a-content{grid-template-columns:92px 1fr}.a-equip{min-height:67px}.a-equip .label{font-size:9px}.a-gunpic{height:68px}.a-wname{font-size:9px}.a-meta{padding:0 2px 3px}.a-bar{height:5px}.a-filters{grid-template-columns:repeat(4,minmax(0,1fr))}.a-filter{font-size:9px}.a-right{padding:5px}.a-tab{padding:8px 2px}.a-footer{margin-top:5px}.a-status{font-size:9px}}
+
+
+/* Online room browser and create-room dialog */
+#roomBrowser{position:fixed;inset:0;z-index:11;overflow:auto;background:#08090a;color:#eee;font-family:Arial,Tahoma,sans-serif;touch-action:pan-y}
+#roomBrowser *{box-sizing:border-box}
+.r-shell{min-height:100%;padding:6px;background:linear-gradient(135deg,#2b3034,#090a0b 40%,#171a1c);border:3px solid #51585e}
+.r-header{display:flex;align-items:center;gap:8px;padding:9px;background:linear-gradient(#42484d,#0b0d0f);border-bottom:4px solid #50565b}
+.r-title{font-size:clamp(17px,2.5vw,28px);font-weight:1000;font-style:italic;white-space:nowrap}.r-title em{color:#ef4a35;font-style:normal}
+.r-sub{font-size:11px;color:#aeb6bc;margin-top:3px}.r-head-actions{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+.r-btn{border:2px solid #777;background:linear-gradient(#555b60,#17191b);color:#eee;padding:9px 13px;font-weight:800;cursor:pointer}
+.r-btn.orange{background:linear-gradient(#ff941f,#b44809);border-color:#ffae46}
+.r-table-wrap{margin-top:8px;border:3px solid #454b50;background:#0b0c0d;overflow:auto}
+.r-table{width:100%;border-collapse:separate;border-spacing:2px;min-width:650px;table-layout:fixed}
+.r-table th{height:31px;background:linear-gradient(#353a3e,#111314);color:#d7d9da;font-size:12px;text-align:left;padding:5px;border-bottom:2px solid #5c6266}
+.r-table td{height:39px;background:linear-gradient(90deg,#202326,#101213);border-top:1px solid #393d40;border-bottom:1px solid #030303;padding:5px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-table tr{cursor:pointer}.r-table tbody tr:hover td{background:linear-gradient(90deg,#3a2c20,#1c1d1e)}.r-table tbody tr.chosen td{outline:1px solid #ed7c24;background:#382619}
+.r-num{color:#9da3a7;text-align:center}.r-mode{display:inline-block;min-width:76px;text-align:center;padding:5px 3px;background:linear-gradient(#853a38,#421a1a);border:1px solid #9a4b46;color:#fff;font-weight:900;font-size:10px}
+.r-mode.bomb{background:linear-gradient(#28757b,#153f43);border-color:#48979b}.r-mode.head{background:linear-gradient(#795044,#39231d)}
+.r-map{color:#d1d5d7}.r-count{text-align:center;font-variant-numeric:tabular-nums}.r-ping{color:#48c5ff;font-size:18px;letter-spacing:-3px;text-shadow:0 0 6px #1689cb}.r-status{font-size:15px}.r-locked{color:#ffce72}
+.r-bottom{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;padding:12px 2px 3px}
+.r-bottom .r-btn{min-width:120px;font-size:14px;padding:12px 15px}
+.r-notice{font-size:11px;color:#aeb7bc;padding:7px 3px}
+#roomCreate{position:fixed;inset:0;z-index:13;display:none;align-items:center;justify-content:center;padding:12px;background:#000c;font-family:Arial,Tahoma,sans-serif;color:#eee}
+#roomCreate.open{display:flex}
+.r-dialog{width:min(740px,100%);max-height:94dvh;overflow:auto;border:4px solid #5d6265;background:linear-gradient(130deg,#29272a,#100f11 50%,#252326);box-shadow:0 15px 50px #000;padding:12px}
+.r-dialog-head{display:flex;align-items:center;gap:10px;border-bottom:2px solid #5a5046;padding:4px 0 9px;margin-bottom:9px;font-size:17px;font-weight:bold}.r-dialog-head input{flex:1;min-width:0}
+.r-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.r-field{background:#171719;border:2px solid #484447;padding:9px;min-width:0}
+.r-field h3{margin:0 0 8px;font-size:13px;color:#ffc47b}
+.r-field label{display:block;font-size:12px;color:#c4bdb8;margin:7px 0 4px}
+.r-field input[type=text],.r-field select,.r-dialog-head input{width:100%;background:#100e10;border:1px solid #625a5c;color:#eee;padding:8px;border-radius:2px}
+.r-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px}.r-checks label{margin:2px 0}.r-maps{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.r-mapchoice{border:2px solid #514b46;background:linear-gradient(#363a3a,#171819);padding:5px;cursor:pointer;text-align:center;font-size:11px}.r-mapchoice.active{border-color:#ff8b22;color:#ffd08a}.r-mapart{height:54px;margin-bottom:4px;background:linear-gradient(140deg,#9b9a75,#4b6459 35%,#4d4130 70%,#b3a77f);display:grid;place-items:center;font-size:24px;text-shadow:1px 2px #000}
+.r-dialog-actions{display:flex;justify-content:center;gap:9px;margin-top:10px}.r-dialog-actions button{min-width:105px}
+@media(max-width:650px){.r-shell{padding:3px}.r-header{flex-wrap:wrap}.r-head-actions{margin-left:0;width:100%}.r-head-actions .r-btn{flex:1;padding:8px 5px;font-size:11px}.r-table{min-width:610px}.r-bottom{justify-content:center}.r-bottom .r-btn{min-width:0;flex:1;padding:10px 4px;font-size:11px}.r-fields{grid-template-columns:1fr}.r-dialog{padding:8px}.r-dialog-head{font-size:14px}.r-maps .r-mapart{height:42px}}
+
+
+/* Military rank + EXP progression */
+.a-rankbox{margin-top:8px;padding:8px;background:linear-gradient(135deg,#242628,#090a0b);border:2px solid #555d63;box-shadow:inset 0 0 0 1px #080909}
+.a-rankhead{display:flex;align-items:center;gap:8px}
+.a-rankbadge{width:48px;height:43px;flex:none;display:grid;place-items:center;background:linear-gradient(145deg,#263b4c,#101c28);border:2px solid #a4b0b7;box-shadow:inset 0 0 0 2px #15191c;color:#fff;font-size:23px;text-shadow:0 2px #000}
+.a-rankbadge.bronze{background:linear-gradient(145deg,#79523c,#2b1b15);border-color:#b98a6b}
+.a-rankbadge.silver{background:linear-gradient(145deg,#747c83,#272c31);border-color:#d4dadd}
+.a-rankbadge.gold{background:linear-gradient(145deg,#a67d2e,#493316);border-color:#f1d18b}
+.a-rankbadge.blue{background:linear-gradient(145deg,#2c658d,#14283d);border-color:#7bc5f2}
+.a-rankbadge.green{background:linear-gradient(145deg,#276d58,#12392e);border-color:#75c7a6}
+.a-rankbadge.red{background:linear-gradient(145deg,#913b3b,#431b20);border-color:#ed9b9b}
+.a-rankname{font-size:12px;font-weight:900;color:#ffe0a1}
+.a-ranksub{font-size:10px;color:#b7bec2;margin-top:3px}
+.a-expbar{height:9px;background:#050606;border:1px solid #687077;margin-top:7px;overflow:hidden}
+.a-expbar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,#57d5ff 0 7px,#1485b9 7px 10px);box-shadow:0 0 6px #169edc}
+.a-expfoot{display:flex;justify-content:space-between;gap:4px;margin-top:4px;color:#c3c9cd;font-size:10px}
+.a-ranklist{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:8px}
+.a-rankitem{border:1px solid #555b60;background:#111416;color:#cdd2d6;text-align:center;padding:5px 1px;min-width:0}
+.a-rankitem.current{border:2px solid #ff9b32;background:#382514;color:#ffe1a4}
+.a-rankitem.locked{opacity:.48}
+.a-rankitem b{display:block;font-size:17px;line-height:22px}.a-rankitem small{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hudRank{position:fixed;top:74px;left:10px;z-index:5;background:#080b0ddd;border:1px solid #6d7c86;color:#eee;padding:6px 9px;border-radius:4px;font-size:11px;pointer-events:none;display:none}
+#hudRank strong{color:#ffd28a}#hudRank .miniExp{height:4px;background:#30383e;margin-top:4px;width:100px}#hudRank .miniExp i{display:block;height:100%;background:#43bde9}
+@media(max-width:640px){.a-rankbadge{width:40px;height:38px;font-size:20px}.a-ranklist{grid-template-columns:repeat(5,minmax(0,1fr))}#hudRank{top:116px;left:6px;font-size:10px}}
+
+
+/* v1.8 player hub */
+#psHub{position:fixed;inset:0;z-index:9999;display:none;overflow:auto;background:#080a0c;color:#edf1f4;font-family:Arial,sans-serif;padding:10px}#psHub.open{display:block}.ps-panel{max-width:900px;margin:auto;border:2px solid #606970;background:linear-gradient(135deg,#292e32,#0b0d0f);padding:12px}.ps-head{display:flex;align-items:center;gap:8px;border-bottom:2px solid #50575c;padding-bottom:10px;margin-bottom:12px}.ps-head h2{font-size:20px;margin:0}.ps-head em{color:#ff8732;font-style:normal}.ps-spacer{flex:1}.ps-balance{color:#ffd27b;font-weight:900;background:#111;padding:8px;border:1px solid #66543b}.ps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ps-card{background:linear-gradient(#252a2e,#111315);border:1px solid #555e64;padding:10px;min-width:0}.ps-icon{font-size:27px}.ps-name{font-weight:900;color:#ffcf8a}.ps-desc{font-size:12px;color:#bac1c6;min-height:32px;margin:5px 0}.ps-btn{border:2px solid #777;background:linear-gradient(#555d62,#171a1c);color:#fff;font-weight:900;padding:9px 11px;cursor:pointer}.ps-btn.orange{background:linear-gradient(#ff982d,#a9430b);border-color:#ffc06a}.ps-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.ps-profile{display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:center}.ps-avatar{height:90px;background:#182025;border:2px solid #66727a;display:grid;place-items:center;font-size:46px}.ps-statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ps-stat{background:#101315;border:1px solid #3c4449;padding:8px;font-size:12px;color:#b9c2c7}.ps-stat b{display:block;color:#fff;font-size:16px;margin-top:4px}.ps-empty{padding:22px;text-align:center;color:#aeb6bc;border:1px dashed #596168}.ps-subtitle{font-size:14px;color:#ffd08a;margin:10px 0}@media(max-width:620px){#psHub{padding:4px}.ps-panel{padding:8px}.ps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ps-head h2{font-size:16px}.ps-balance{font-size:11px;padding:6px}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud" style="display:none">
+ <div class="top">
+  <div class="pill"><span class="blue">POINT STRIKE</span><br><span id="roundText">PB ARENA • ROUND 1</span></div>
+  <div id="teamScore" class="pill"><span class="red">RED <b id="redScore">0</b></span> &nbsp;—&nbsp; <span class="blue">BLUE <b id="blueScore">0</b></span><br><small id="aliveText">RED 4 • BLUE 4</small></div>
+  <div class="pill">HP <span id="hp">100</span><div id="healthbar"><div id="healthfill"></div></div><small id="ammo">AMMO 24 / 96</small></div>
+ </div>
+ <div id="crosshair"></div><div id="hudRank"><strong id="hudRankName">ฝึกหัด</strong><div id="hudRankExp">EXP 0</div><div class="miniExp"><i id="hudRankFill" style="width:0%"></i></div></div>
+ <div id="centerMsg">กำจัดทีมแดงให้หมดเพื่อชนะรอบ</div>
+ <div id="hint">จอยซ้าย: เดิน<br>ลากด้านขวา: เล็ง<br>FIRE: ยิงพลังงาน</div>
+</div>
+<div id="rotate">แนะนำให้เล่นแนวนอน</div>
+<div id="toast"></div>
+<div id="joy" style="display:none"><div id="nub"></div></div>
+<button id="fire" class="control" style="display:none">FIRE</button>
+<button id="reload" class="control" style="display:none">RELOAD</button>
+<button id="dash" class="control" style="display:none">DASH</button>
+<button id="pause" style="display:none">Ⅱ</button>
+<div id="pauseOverlay" class="overlay hidden"><div class="card"><h1>PAUSED</h1><div class="sub">เกมหยุดชั่วคราว</div><button id="resume" class="action">เล่นต่อ ▶</button></div></div>
+<div id="arsenal">
+ <div class="a-shell">
+  <header class="a-top">
+   <div class="a-logo">POINT <em>STRIKE</em></div>
+   <button class="a-nav" data-anav="แคลน">♟ แคลน</button>
+   <button class="a-nav active" data-anav="กระเป๋าสัมภาระ">🎒 กระเป๋าสัมภาระ</button>
+   <button class="a-nav" data-anav="คลังแสง">🛒 คลังแสง</button>
+   <button class="a-nav" id="openRooms">☷ เลือกห้อง</button><button class="a-nav" id="openShop">🛒 ร้านค้า</button><button class="a-nav" id="openInventory">🎒 คลังไอเทม</button><button class="a-nav" id="openProfile">👤 โปรไฟล์</button>
+   <div class="a-icons"><button onclick="arsenalNotice('กลับหน้าหลัก')">↶</button><button onclick="arsenalNotice('POINT STRIKE')">▣</button><button onclick="arsenalNotice('ตั้งค่าเกม')">⚙</button></div>
+  </header>
+  <div class="a-layout">
+   <aside class="a-panel a-profile">
+    <div class="a-info">
+     <div class="a-name">🎖 HnZz</div>
+     <div class="a-stats"><span>Exp</span><b>0</b><span>Point</span><b>0</b><span>Power</span><b>0</b><span>Defense</span><b>0</b><span>M.Speed</span><b>0</b><span>Helmet Def.</span><b>0</b><span>ความแม่นยำ</span><b>0</b><span>HP</span><b>110</b></div>
+    </div>
+    <div class="a-rankbox">
+     <div class="a-rankhead">
+      <div class="a-rankbadge silver" id="rankBadge">▰</div>
+      <div style="min-width:0;flex:1">
+       <div class="a-rankname" id="rankName">ฝึกหัด</div>
+       <div class="a-ranksub" id="rankNumber">RANK 01 • PRIVATE</div>
+      </div>
+     </div>
+     <div class="a-expbar"><i id="rankExpFill"></i></div>
+     <div class="a-expfoot"><span>EXP <b id="rankExp">0</b></span><span id="rankNext">0 / 100</span></div>
+     <div class="a-ranklist" id="rankList"></div>
+    </div>
+    <div class="a-avatar"><div class="a-operator"><div class="a-helmet"></div><div class="a-goggle"></div><div class="a-head"></div><div class="a-neck"></div><div class="a-body"></div><div class="a-shirt"></div><div class="a-arm left"></div><div class="a-arm right"></div><div class="a-belt"></div><div class="a-shorts"></div><div class="a-leg l"></div><div class="a-leg r"></div><div class="a-boot l"></div><div class="a-boot r"></div><div class="a-gun"></div></div></div>
+    <div class="a-money"><span>Point</span><b>21343 Point</b><span>Cash</span><b>62987 HP</b><button class="a-orange" onclick="arsenalNotice('ระบบเติม Cash ยังไม่เชื่อมต่อ')">เติม Cash</button></div>
+   </aside>
+   <main class="a-panel a-right">
+    <div class="a-tabs"><button class="a-tab active" data-atab="อาวุธ">อาวุธ</button><button class="a-tab" data-atab="ตัวละคร">ตัวละคร</button><button class="a-tab" data-atab="ไอเท็ม">ไอเท็ม</button></div>
+    <div class="a-filters" id="aFilters"><button class="a-filter active" data-afilter="ทั้งหมด">ทั้งหมด</button><button class="a-filter" data-afilter="อาวุธหลัก">อาวุธหลัก</button><button class="a-filter" data-afilter="อาวุธรอง">อาวุธรอง</button><button class="a-filter" data-afilter="ระเบิด">ระเบิด</button></div>
+    <div class="a-content">
+     <div class="a-equipment">
+      <div class="a-equip"><span class="label">Kiss S.V</span><span class="icon">🔫</span><div class="a-bar" style="width:85%"><i style="width:85%;height:100%;display:block"></i></div></div>
+      <div class="a-equip"><span class="label">HK 69</span><span class="icon">▰</span><div class="a-bar" style="width:85%"><i style="width:48%;height:100%;display:block;background:#a83429"></i></div></div>
+      <div class="a-equip"><span class="label">M-7</span><span class="icon">🗡️</span><div class="a-bar" style="width:85%"><i style="width:75%;height:100%;display:block"></i></div></div>
+      <div class="a-equip"><span class="label">K-400</span><span class="icon">💣</span><div class="a-bar" style="width:85%"><i style="width:60%;height:100%;display:block"></i></div></div>
+      <div class="a-equip"><span class="label">Smoke</span><span class="icon">🧯</span><div class="a-bar" style="width:85%"><i style="width:65%;height:100%;display:block"></i></div></div>
+     </div>
+     <div><div class="a-grid" id="aGrid"></div><div style="text-align:right;color:#999;font-size:11px;padding:3px">▲<br>▼</div></div>
+    </div>
+    <div class="a-footer"><button class="active">ทั้งหมด</button><button>ทีม</button><button>แคลน</button><button>กระสุน</button><span style="flex:1"></span><button onclick="arsenalNotice('เลือกอาวุธแล้วกดติดตั้ง')">เพิ่ม</button><button onclick="arsenalRemove()">ลบออก</button><button onclick="arsenalEquip()">ติดตั้ง</button><button id="useRenameItem" style="display:none" onclick="useNameChangeItem()">ใช้ไอเทมเปลี่ยนชื่อ</button><button id="startBtn" class="a-orange">เริ่มเกม ▶</button></div>
+   </main>
+  </div>
+  <footer class="a-status"><span>057 ห้องสาธารณะ • 005 พลทหารเก่ง</span><span id="aStatus">ยินดีต้อนรับเข้าสู่ POINT STRIKE</span></footer>
+ </div>
+</div>
+
+<div id="roomBrowser" class="hidden">
+ <div class="r-shell">
+  <header class="r-header">
+   <div><div class="r-title">POINT <em>STRIKE</em></div><div class="r-sub">MULTIPLAYER LOBBY • ห้องตัวอย่าง (ยังไม่เชื่อมเซิร์ฟเวอร์)</div></div>
+   <div class="r-head-actions">
+    <button class="r-btn" id="roomBack">← กลับคลังแสง</button>
+    <button class="r-btn" id="roomRefresh">⟳ รีเฟรช</button>
+   </div>
+  </header>
+  <div class="r-table-wrap">
+   <table class="r-table">
+    <thead><tr><th style="width:42px">ลำดับ</th><th>ชื่อห้อง</th><th style="width:112px">เลือกภารกิจ</th><th>แผนที่</th><th style="width:76px">จำนวน</th><th style="width:60px">สถานะ</th></tr></thead>
+    <tbody id="roomRows"></tbody>
+   </table>
+  </div>
+  <div class="r-bottom">
+   <button class="r-btn orange" id="roomQuick">➜ เริ่มทันที</button>
+   <button class="r-btn" id="roomRefreshBottom">⟳ รีเฟรช</button>
+   <button class="r-btn orange" id="roomCreateOpen">⌂ สร้างห้อง</button>
+   <button class="r-btn" id="roomJoin">➜ เข้า</button>
+  </div>
+  <div class="r-notice" id="roomNotice">เลือกห้องแล้วกด “เข้า” หรือสร้างห้องใหม่เพื่อเริ่มแมตช์</div>
+ </div>
+</div>
+<div id="roomCreate">
+ <div class="r-dialog">
+  <div class="r-dialog-head"><span>สร้างห้อง</span><input id="newRoomName" type="text" maxlength="30" value="ห้องใหม่ของฉัน"><span>🔒</span></div>
+  <div class="r-fields">
+   <section class="r-field">
+    <h3>เลือกโหมดเกม</h3>
+    <div id="modeChoices">
+     <label><input type="radio" name="roomMode" value="DEATH MATCH" checked> Death Match</label>
+     <label><input type="radio" name="roomMode" value="BOMB MISSION"> Bomb Mission</label>
+     <label><input type="radio" name="roomMode" value="HEAD HUNTER"> Head Hunter</label>
+     <label><input type="radio" name="roomMode" value="TEAM DEATH MATCH"> Team Death Match</label>
+    </div>
+    <label for="roomTime">เวลาแข่งขัน</label><select id="roomTime"><option>5 นาที</option><option selected>10 นาที</option><option>15 นาที</option><option>20 นาที</option></select>
+    <label for="roomLimit">จำนวนผู้เล่น</label><select id="roomLimit"><option>2 VS 2</option><option selected>4 VS 4</option><option>6 VS 6</option><option>8 VS 8</option></select>
+    <label><input id="roomPrivate" type="checkbox"> ตั้งห้องส่วนตัว (ต้องใช้รหัส)</label>
+    <label for="roomPassword">รหัสห้อง (ถ้าตั้งส่วนตัว)</label><input id="roomPassword" type="text" maxlength="12" placeholder="ไม่บังคับ">
+   </section>
+   <section class="r-field">
+    <h3>เลือกแผนที่</h3>
+    <div class="r-maps" id="mapChoices">
+     <button class="r-mapchoice active" data-map="WestStation"><div class="r-mapart">🏜️</div>WestStation</button>
+     <button class="r-mapchoice" data-map="Rothen Village"><div class="r-mapart">🏘️</div>Rothen Village</button>
+     <button class="r-mapchoice" data-map="Downtown"><div class="r-mapart">🏙️</div>Downtown</button>
+    </div>
+    <h3 style="margin-top:13px">ตั้งค่าห้อง</h3>
+    <div class="r-checks">
+     <label><input type="checkbox" checked> อนุญาตให้เข้าห้อง</label>
+     <label><input type="checkbox" checked> สมดุลทีมอัตโนมัติ</label>
+     <label><input type="checkbox"> จำกัดอาวุธพิเศษ</label>
+     <label><input type="checkbox"> มุมมองบุคคลที่ 3</label>
+    </div>
+   </section>
+  </div>
+  <div class="r-dialog-actions"><button class="r-btn orange" id="roomCreateConfirm">ยืนยันสร้าง</button><button class="r-btn" id="roomCreateCancel">ยกเลิก</button></div>
+ </div>
+</div>
+
+<div id="psHub"><div class="ps-panel"><div class="ps-head"><h2>POINT <em>STRIKE</em> <span id="psHubTitle">SHOP</span></h2><div class="ps-spacer"></div><div class="ps-balance">POINT <span id="psPointBalance">0</span></div><button class="ps-btn" id="psHubClose">✕ ปิด</button></div><div id="psHubBody"></div></div></div>
+<div id="start" class="overlay hidden"><div class="card"><h1>POINT STRIKE</h1><div class="sub">FPS 3D • ทีมแดงปะทะทีมน้ำเงิน</div><button id="oldStartBtn" class="action">เริ่มเกม ▶</button></div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const $=s=>document.querySelector(s);
+const canvas=$('#game');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x091522);scene.fog=new THREE.Fog(0x091522,24,70);
+const camera=new THREE.PerspectiveCamera(76,innerWidth/innerHeight,.1,100);
+scene.add(new THREE.HemisphereLight(0xc9f4ff,0x1c2735,2.1));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(6,14,5);scene.add(sun);
+const material=(color,metalness=.05,roughness=.7,emissive=0)=>new THREE.MeshStandardMaterial({color,metalness,roughness,emissive,emissiveIntensity:emissive?0.35:0});
+const mats={floor:material(0x1a2b38),wall:material(0x314554),trim:material(0x4e7385,.15,.4),red:material(0xc52c43,.1,.55),redGlow:material(0xff5667,.05,.3,0xff253b),blue:material(0x217ab9,.1,.55),blueGlow:material(0x58d8ff,.05,.3,0x147ca0),dark:material(0x14222e),glass:material(0x64dfff,.15,.25,0x126a88)};
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(70,70),mats.floor);floor.rotation.x=-Math.PI/2;floor.position.y=-.1;scene.add(floor);
+const grid=new THREE.GridHelper(70,35,0x2d687a,0x233b4a);grid.position.y=-.08;scene.add(grid);
+function addBox(x,y,z,w,h,d,mat=mats.wall){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);scene.add(m);return m}
+// Arena walls
+addBox(0,2,-25,52,4,1.2);addBox(0,2,25,52,4,1.2);addBox(-26,2,0,1.2,4,50);addBox(26,2,0,1.2,4,50);
+// cover blocks and side lanes
+const cover=[];
+for(const [x,z,w,d,h] of [[-13,-14,5,3,1.8],[0,-14,4,3,1.5],[13,-14,5,3,1.8],[-13,0,3,5,1.6],[13,0,3,5,1.6],[-7,12,4,3,1.5],[7,12,4,3,1.5],[0,5,3,3,1.2],[-19,8,3,3,2],[19,-7,3,3,2]]){cover.push(addBox(x,h/2,z,w,h,d));addBox(x,h+.04,z,w+.12,.08,d+.12,mats.trim)}
+// Team markers
+for(let x of [-20,20]){const pad=new THREE.Mesh(new THREE.CylinderGeometry(3,3,.16,32),material(x<0?0x8c2333:0x175b91,.1,.5));pad.position.set(x,.01,0);scene.add(pad)}
+// stylized, non-realistic team avatars
+function makeBot(team,isPlayer=false){
+ const g=new THREE.Group();g.userData.team=team;g.userData.isPlayer=isPlayer;
+ const armor=new THREE.Mesh(new THREE.CapsuleGeometry(.34,.65,4,8),team==='red'?mats.red:mats.blue);armor.position.y=.72;g.add(armor);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.23,12,10),material(0xc7d4dc));head.position.y=1.35;g.add(head);
+ const visor=new THREE.Mesh(new THREE.BoxGeometry(.35,.09,.1),team==='red'?mats.redGlow:mats.blueGlow);visor.position.set(0,1.37,.19);g.add(visor);
+ const pack=new THREE.Mesh(new THREE.BoxGeometry(.4,.42,.2),mats.dark);pack.position.set(0,.78,-.28);g.add(pack);
+ const shoulder=new THREE.Mesh(new THREE.BoxGeometry(.72,.18,.3),team==='red'?mats.redGlow:mats.blueGlow);shoulder.position.y=1.02;g.add(shoulder);
+ // abstract energy blaster prop
+ const weapon=new THREE.Mesh(new THREE.BoxGeometry(.13,.14,.68),mats.dark);weapon.position.set(.28,.92,.42);g.add(weapon);
+ const muzzle=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),team==='red'?mats.redGlow:mats.blueGlow);muzzle.position.set(.28,.92,.78);g.add(muzzle);
+ g.userData.weapon=weapon;g.userData.muzzle=muzzle;g.userData.hp=100;g.userData.cool=Math.random()*.7;g.userData.respawn=0;g.userData.strafe=Math.random()<.5?-1:1;g.userData.nextStrafe=1+Math.random()*2;g.userData.speed=.9+Math.random()*.45;
+ scene.add(g);return g;
+}
+const player=makeBot('blue',true);player.position.set(19,0,16);
+let yaw=0, pitch=0, health=100, ammo=24,reserve=96, reloading=false, reloadTime=0, dashTime=0,dashCooldown=0,fireHeld=false, running=false,paused=false,round=1;
+let redScore=0,blueScore=0,shots=[],bots=[],effects=[],lastTime=performance.now(),toastTimer=0,invuln=0;
+function spawnTeams(){
+ for(const b of bots)scene.remove(b);bots=[];
+ const positions=[[-19,0,-17],[-20,0,-5],[-13,0,4],[-7,0,-19],[17,0,-19],[21,0,-8],[12,0,4],[7,0,-18]];
+ positions.forEach((p,i)=>{const team=i<4?'red':'blue';const b=makeBot(team);b.position.set(...p);b.userData.hp=100;b.userData.cool=.4+Math.random();bots.push(b)});
+}
+spawnTeams();
+function notify(s){const el=$('#toast');el.textContent=s;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',1250)}
+function hud(){
+ $('#hp').textContent=Math.max(0,Math.ceil(health));$('#healthfill').style.width=Math.max(0,health)+'%';$('#ammo').textContent=`${reloading?'RELOADING…':'AMMO '+ammo+' / '+reserve}`;
+ const reds=bots.filter(b=>b.userData.team==='red'&&b.userData.hp>0).length;
+ const blues=bots.filter(b=>b.userData.team==='blue'&&b.userData.hp>0).length+ (health>0?1:0);
+ $('#redScore').textContent=redScore;$('#blueScore').textContent=blueScore;$('#aliveText').textContent=`RED ${reds} • BLUE ${blues}`;
+ $('#roundText').textContent='PB ARENA • ROUND '+round;
+}
+function beam(from,to,color){const geo=new THREE.BufferGeometry().setFromPoints([from.clone(),to.clone()]);const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color,transparent:true,opacity:.9}));scene.add(line);effects.push({obj:line,time:.09})}
+function flash(pos,color){const m=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.95}));m.position.copy(pos);scene.add(m);effects.push({obj:m,time:.16})}
+function alive(b){return b.userData.hp>0}
+function nearestEnemy(origin,team,maxDist=40){let best=null,bd=maxDist;for(const b of [player,...bots]){if(b.userData.team===team||!alive(b)||b===origin)continue;const d=origin.position.distanceTo(b.position);if(d<bd){bd=d;best=b}}return best}
+function shootPlayer(){
+ if(!running||paused||reloading||ammo<=0)return;
+ ammo--;const dir=new THREE.Vector3(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch)).normalize();
+ const start=camera.position.clone(),end=start.clone().addScaledVector(dir,38);
+ let target=null,best=38;
+ for(const b of bots){if(!alive(b)||b.userData.team==='blue')continue;const aim=b.position.clone().add(new THREE.Vector3(0,1,0));const v=aim.clone().sub(start);const along=v.dot(dir);if(along<0||along>best)continue;const near=start.clone().addScaledVector(dir,along);if(near.distanceTo(aim)<.95){target=b;best=along}}
+ const hit=start.clone().addScaledVector(dir,best);beam(start,hit,0x75efff);
+ if(target){target.userData.hp-=34;flash(target.position.clone().add(new THREE.Vector3(0,1,0)),0x72efff);if(target.userData.hp<=0){target.userData.hp=0;target.visible=false;blueScore++;addExp(25,'กำจัดศัตรู');try{psKills++;psPoints+=100;psSave()}catch(e){}notify('กำจัดทีมแดง +1 คะแนน • +100 Point');checkRound()}else notify('โดนเป้าหมาย!')}
+ hud();
+}
+function reload(){if(reloading||ammo===24||reserve<=0||!running||paused)return;reloading=true;reloadTime=1.15;hud();notify('กำลังเติมพลังงาน…')}
+function dash(){if(!running||paused||dashCooldown>0)return;dashTime=.28;dashCooldown=2.1;notify('DASH!')}
+function checkRound(){if(bots.filter(b=>b.userData.team==='red'&&alive(b)).length===0){blueScore+=2;round++;addExp(50,'ชนะรอบ');notify('ชนะรอบ! +2 คะแนน');setTimeout(()=>{if(running){health=100;ammo=24;reserve=Math.min(96,reserve+24);player.position.set(19,0,16);yaw=0;pitch=0;spawnTeams();hud()}},1200)}}
+function endRound(){if(health<=0){health=0;running=false;$('#start').classList.remove('hidden');$('#start').querySelector('h1').textContent='ROUND OVER';$('#start').querySelector('.sub').innerHTML='ทีมของคุณพ่ายแพ้ในรอบนี้<br>กดเริ่มเกมเพื่อเล่นใหม่';$('#startBtn').textContent='เล่นอีกครั้ง ▶';$('#pause').textContent='Ⅱ';}hud()}
+function startMatch(){try{psMatches++;psSave()}catch(e){}health=100;ammo=24;reserve=96;reloading=false;round=1;redScore=0;blueScore=0;player.position.set(19,0,16);yaw=0;pitch=0;spawnTeams();running=true;paused=false;$('#arsenal').classList.add('hidden');$('#roomBrowser').classList.add('hidden');$('#roomCreate').classList.remove('open');$('#start').classList.add('hidden');$('#pauseOverlay').classList.add('hidden');$('#pause').classList.remove('hidden');$('#pause').textContent='Ⅱ';$('#game').style.visibility='visible';$('#hud').style.display='block';$('#hudRank').style.display='block';$('#joy').style.display='block';$('#fire').style.display='flex';$('#reload').style.display='flex';$('#dash').style.display='flex';hud();notify('BLUE TEAM — เริ่มรอบ!')}
+$('#startBtn').addEventListener('click',startMatch);
+$('#oldStartBtn').addEventListener('click',startMatch);
+$('#pause').addEventListener('click',()=>{if(!running)return;paused=!paused;$('#pauseOverlay').classList.toggle('hidden',!paused);$('#pause').textContent=paused?'▶':'Ⅱ';fireHeld=false});
+$('#resume').addEventListener('click',()=>{paused=false;$('#pauseOverlay').classList.add('hidden');$('#pause').textContent='Ⅱ'});
+$('#fire').addEventListener('pointerdown',e=>{e.preventDefault();fireHeld=true;$('#fire').setPointerCapture?.(e.pointerId);shootPlayer()});
+$('#fire').addEventListener('pointerup',()=>fireHeld=false);$('#fire').addEventListener('pointercancel',()=>fireHeld=false);$('#fire').addEventListener('contextmenu',e=>e.preventDefault());
+$('#reload').addEventListener('pointerdown',e=>{e.preventDefault();reload()});$('#dash').addEventListener('pointerdown',e=>{e.preventDefault();dash()});
+// Virtual joystick
+const joyEl=$('#joy'),nub=$('#nub'),joy={x:0,y:0};let joyOn=false;
+function joyMove(e){const r=joyEl.getBoundingClientRect();let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;const l=Math.hypot(x,y),m=34;if(l>m){x=x/l*m;y=y/l*m}joy.x=x/m;joy.y=y/m;nub.style.left=(33+x)+'px';nub.style.top=(33+y)+'px'}
+joyEl.addEventListener('pointerdown',e=>{joyOn=true;joyEl.setPointerCapture(e.pointerId);joyMove(e)});joyEl.addEventListener('pointermove',e=>{if(joyOn)joyMove(e)});function joyReset(){joyOn=false;joy.x=joy.y=0;nub.style.left='33px';nub.style.top='33px'}joyEl.addEventListener('pointerup',joyReset);joyEl.addEventListener('pointercancel',joyReset);
+// Look by dragging anywhere outside the controls
+let look=null;
+canvas.addEventListener('pointerdown',e=>{if(e.clientX>innerWidth*.34&&e.clientY>75){look={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)}});
+canvas.addEventListener('pointermove',e=>{if(!look||!running||paused)return;const dx=e.clientX-look.x,dy=e.clientY-look.y;yaw-=dx*.006;pitch=THREE.MathUtils.clamp(pitch-dy*.003,-.55,.55);look={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('pointerup',()=>look=null);canvas.addEventListener('pointercancel',()=>look=null);
+// Keyboard support for desktop testing
+const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space')dash();if(e.code==='KeyR')reload();if(e.code==='Enter'&&!running)$('#startBtn').click()});addEventListener('keyup',e=>keys[e.code]=false);
+function botShoot(b,target){
+ if(b.userData.cool>0||!alive(b)||!alive(target))return;
+ b.userData.cool=1.0+Math.random()*.65;
+ const a=b.position.clone().add(new THREE.Vector3(0,1.05,0)),t=target.position.clone().add(new THREE.Vector3(0,1,0));
+ const d=a.distanceTo(t);if(d>26)return;
+ // Bots only land shots occasionally so mobile play remains fair.
+ const accuracy=target===player?.42:.55;if(Math.random()>accuracy)return;
+ beam(a,t,b.userData.team==='red'?0xff526b:0x58baff);
+ if(target===player){if(invuln>0)return;health-=9;invuln=.25;flash(t,b.userData.team==='red'?0xff526b:0x58baff);if(health<=0)endRound();hud()}
+ else {target.userData.hp-=14;if(target.userData.hp<=0){target.userData.hp=0;target.visible=false;if(target.userData.team==='red')blueScore++;else redScore++;checkRound();hud()}}
+}
+function updateBot(b,dt,now){
+ if(!alive(b))return;b.userData.cool=Math.max(0,b.userData.cool-dt);b.userData.nextStrafe-=dt;if(b.userData.nextStrafe<=0){b.userData.strafe*=-1;b.userData.nextStrafe=1+Math.random()*2}
+ const target=nearestEnemy(b,b.userData.team,35);if(!target)return;
+ const dx=target.position.x-b.position.x,dz=target.position.z-b.position.z,dist=Math.hypot(dx,dz);
+ b.rotation.y=Math.atan2(dx,dz);
+ // Move in, then strafe around target; cover blocks give the arena lanes.
+ let mx=0,mz=0;if(dist>8){mx=dx/(dist||1);mz=dz/(dist||1)}else if(dist<4){mx=-dx/(dist||1);mz=-dz/(dist||1)}
+ mx+=(-dz/(dist||1))*b.userData.strafe*.38;mz+=(dx/(dist||1))*b.userData.strafe*.38;
+ const speed=b.userData.speed*dt;b.position.x+=mx*speed;b.position.z+=mz*speed;
+ b.position.x=THREE.MathUtils.clamp(b.position.x,-23,23);b.position.z=THREE.MathUtils.clamp(b.position.z,-22,22);
+ if(dist<25)botShoot(b,target);
+}
+function animate(now){
+ requestAnimationFrame(animate);const dt=Math.min((now-lastTime)/1000,.04);lastTime=now;
+ if(running&&!paused){
+  invuln=Math.max(0,invuln-dt);dashCooldown=Math.max(0,dashCooldown-dt);dashTime=Math.max(0,dashTime-dt);
+  if(reloading){reloadTime-=dt;if(reloadTime<=0){const n=Math.min(24-ammo,reserve);ammo+=n;reserve-=n;reloading=false;hud()}}
+  if(fireHeld&&now-(animate.lastShot||0)>170){animate.lastShot=now;shootPlayer()}
+  let f=0,s=0;if(joyOn){f=-joy.y;s=joy.x}else{if(keys.KeyW||keys.ArrowUp)f=1;if(keys.KeyS||keys.ArrowDown)f=-1;if(keys.KeyA||keys.ArrowLeft)s=-1;if(keys.KeyD||keys.ArrowRight)s=1}
+  const speed=dashTime>0?11:5.2;
+  player.position.x+=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*speed*dt;
+  player.position.z+=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*speed*dt;
+  player.position.x=THREE.MathUtils.clamp(player.position.x,-23,23);player.position.z=THREE.MathUtils.clamp(player.position.z,-22,22);
+  // Collision with cover blocks, approximated as circles
+  for(const c of cover){const dx=player.position.x-c.position.x,dz=player.position.z-c.position.z;const minX=(c.geometry.parameters.width||2)/2+.48,minZ=(c.geometry.parameters.depth||2)/2+.48;if(Math.abs(dx)<minX&&Math.abs(dz)<minZ){if(Math.abs(dx)>Math.abs(dz))player.position.x=c.position.x+Math.sign(dx||1)*minX;else player.position.z=c.position.z+Math.sign(dz||1)*minZ}}
+  player.rotation.y=yaw;
+  for(const b of bots)updateBot(b,dt,now);
+  camera.position.set(player.position.x,player.position.y+1.48,player.position.z);
+  camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;
+ }
+ for(let i=effects.length-1;i>=0;i--){effects[i].time-=dt;if(effects[i].time<=0){scene.remove(effects[i].obj);effects[i].obj.geometry?.dispose();if(effects[i].obj.material?.dispose)effects[i].obj.material.dispose();effects.splice(i,1)}}
+ renderer.render(scene,camera);
+}
+
+
+
+// Persistent rank/EXP progression inspired by military insignia in the reference image.
+const rankLevels=[
+ {name:'พลทหารใหม่',short:'Recruit',need:0,icon:'●',tone:'silver'},
+ {name:'พลทหาร',short:'Private',need:100,icon:'▬',tone:'silver'},
+ {name:'พลทหารชั้น 1',short:'PFC',need:250,icon:'▰',tone:'silver'},
+ {name:'สิบตรี',short:'Corporal',need:450,icon:'⌄',tone:'bronze'},
+ {name:'สิบโท',short:'Lance Cpl.',need:700,icon:'⌄⌄',tone:'bronze'},
+ {name:'สิบเอก',short:'Sergeant',need:1000,icon:'≋',tone:'bronze'},
+ {name:'จ่าสิบตรี',short:'Staff Sgt.',need:1400,icon:'≋⌄',tone:'bronze'},
+ {name:'จ่าสิบโท',short:'Gunnery Sgt.',need:1900,icon:'≋⌄⌄',tone:'bronze'},
+ {name:'จ่าสิบเอก',short:'Master Sgt.',need:2500,icon:'≋≋',tone:'bronze'},
+ {name:'ร้อยตรี',short:'2nd Lt.',need:3300,icon:'✦',tone:'blue'},
+ {name:'ร้อยโท',short:'1st Lt.',need:4200,icon:'✦✦',tone:'blue'},
+ {name:'ร้อยเอก',short:'Captain',need:5300,icon:'✦✦✦',tone:'blue'},
+ {name:'พันตรี',short:'Major',need:6600,icon:'✥',tone:'green'},
+ {name:'พันโท',short:'Lt. Colonel',need:8100,icon:'✥✦',tone:'green'},
+ {name:'พันเอก',short:'Colonel',need:9800,icon:'✥✥',tone:'green'},
+ {name:'พลตรี',short:'Major General',need:11800,icon:'✹',tone:'green'},
+ {name:'พลโท',short:'Lt. General',need:14100,icon:'✹✦',tone:'green'},
+ {name:'พลเอก',short:'General',need:16700,icon:'✹✹',tone:'gold'},
+ {name:'จอมพล',short:'Field Marshal',need:19800,icon:'★',tone:'red'},
+ {name:'จอมพลสูงสุด',short:'Supreme',need:23500,icon:'★★',tone:'red'}
+];
+let totalExp=0;
+try{totalExp=Math.max(0,Number(localStorage.getItem('pointStrikeEXP')||0)||0)}catch(e){totalExp=0}
+function currentRank(){
+ let idx=0;for(let i=0;i<rankLevels.length;i++){if(totalExp>=rankLevels[i].need)idx=i;else break}
+ return {idx,rank:rankLevels[idx],next:rankLevels[idx+1]||null};
+}
+function addExp(amount,reason=''){
+ if(!Number.isFinite(amount)||amount<=0)return;
+ const old=currentRank().idx;totalExp+=Math.floor(amount);
+ try{localStorage.setItem('pointStrikeEXP',String(totalExp))}catch(e){}
+ renderRank();
+ const now=currentRank();
+ if(now.idx>old)notify('เลื่อนยศ! '+now.rank.name+' • EXP '+amount+' '+(reason?'('+reason+')':''));
+ else notify('+'+amount+' EXP'+(reason?' • '+reason:''));
+}
+function renderRank(){
+ const {idx,rank,next}=currentRank();
+ const base=rank.need, span=next?next.need-base:1, into=totalExp-base;
+ const pct=next?Math.max(0,Math.min(100,into/span*100)):100;
+ const badge=$('#rankBadge');if(badge){badge.className='a-rankbadge red';badge.textContent='GM'}
+ if($('#rankName'))$('#rankName').textContent='GM';
+ if($('#rankNumber'))$('#rankNumber').textContent='DEVELOPER • GM';
+ if($('#rankExpFill'))$('#rankExpFill').style.width=pct+'%';
+ if($('#rankExp'))$('#rankExp').textContent=totalExp.toLocaleString('th-TH');
+ if($('#rankNext'))$('#rankNext').textContent=next?(into.toLocaleString('th-TH')+' / '+span.toLocaleString('th-TH')+' EXP'):'MAX RANK';
+ if($('#rankList')){
+  $('#rankList').innerHTML='';
+  rankLevels.forEach((r,i)=>{const el=document.createElement('div');el.className='a-rankitem'+(i===idx?' current':'')+(i>idx?' locked':'');el.title=r.name+' • '+r.need+' EXP';el.innerHTML='<b>'+r.icon+'</b><small>'+String(i+1).padStart(2,'0')+' '+r.name+'</small>';$('#rankList').appendChild(el)});
+ }
+ if($('#hudRankName'))$('#hudRankName').textContent=rank.name+' • '+rank.icon;
+ if($('#hudRankExp'))$('#hudRankExp').textContent='EXP '+totalExp.toLocaleString('th-TH')+(next?' · อีก '+(next.need-totalExp)+' ถึงยศถัดไป':' · ยศสูงสุด');
+ if($('#hudRankFill'))$('#hudRankFill').style.width=pct+'%';
+}
+renderRank();
+
+// Room browser: client-side prototype. Real cross-device online play requires a realtime server.
+const demoRooms=[
+ {name:'มหกรรม Chain Killer!!',mode:'DEATH MATCH',map:'WestStation',count:15,max:16,status:'🟦',locked:false},
+ {name:'สมรภูมิเดือดระห่ำ!!',mode:'BOMB MISSION',map:'Downtown',count:8,max:8,status:'🟥',locked:false},
+ {name:'โหดนะจ๊ะ.',mode:'DEATH MATCH',map:'Rothen Village',count:1,max:16,status:'🟨',locked:false},
+ {name:'งานเข้าแล้ว พี่น้อง!!',mode:'HEAD HUNTER',map:'WestStation',count:10,max:10,status:'🟥',locked:false},
+ {name:'มึงเป็นไงเลย!!',mode:'HEAD HUNTER',map:'Downtown',count:3,max:4,status:'🟦',locked:false},
+ {name:'งานเข้าแล้ว พี่น้อง!!',mode:'DEATH MATCH',map:'Rothen Village',count:2,max:2,status:'🟥',locked:false},
+ {name:'มึงเป็นไงเลย!!',mode:'DEATH MATCH',map:'Rothen Village',count:2,max:2,status:'🟥',locked:true},
+ {name:'มึงเป็นไงเลย!!',mode:'DEATH MATCH',map:'WestStation',count:2,max:2,status:'🟥',locked:false},
+ {name:'มหกรรม Chain Killer!!',mode:'DEATH MATCH',map:'Rothen Village',count:5,max:7,status:'🟦',locked:true}
+];
+let chosenRoom=0,selectedMap='WestStation';
+const roomRows=document.querySelector('#roomRows');
+function renderRooms(){
+ roomRows.innerHTML='';
+ demoRooms.forEach((r,i)=>{
+  const tr=document.createElement('tr');tr.className=i===chosenRoom?'chosen':'';
+  const modeClass=r.mode==='BOMB MISSION'?'bomb':r.mode==='HEAD HUNTER'?'head':'';
+  tr.innerHTML=`<td class="r-num">${String(i+1).padStart(3,'0')}</td><td>${r.locked?'<span class="r-locked">🔒 </span>':''}${r.name}</td><td><span class="r-mode ${modeClass}">${r.mode}</span></td><td class="r-map">${r.map}</td><td class="r-count">${String(r.count).padStart(2,'0')}/${String(r.max).padStart(2,'0')}</td><td class="r-status">${r.count>=r.max?'🟥':r.status}</td>`;
+  tr.addEventListener('click',()=>{chosenRoom=i;renderRooms();document.querySelector('#roomNotice').textContent='เลือกห้อง: '+r.name+' • '+r.mode+' • '+r.map});
+  tr.addEventListener('dblclick',()=>joinSelectedRoom());roomRows.appendChild(tr);
+ });
+}
+function openRoomBrowser(){document.querySelector('#arsenal').classList.add('hidden');document.querySelector('#roomBrowser').classList.remove('hidden');renderRooms()}
+function closeRoomBrowser(){document.querySelector('#roomBrowser').classList.add('hidden');document.querySelector('#arsenal').classList.remove('hidden')}
+function openRoomCreate(){document.querySelector('#roomCreate').classList.add('open')}
+function closeRoomCreate(){document.querySelector('#roomCreate').classList.remove('open')}
+function selectedMode(){return document.querySelector('input[name="roomMode"]:checked')?.value||'DEATH MATCH'}
+function createRoom(){
+ const name=document.querySelector('#newRoomName').value.trim()||'ห้องใหม่ของฉัน';
+ const limitText=document.querySelector('#roomLimit').value;
+ const max=Number((limitText.match(/\d+/g)||['4','4'])[1]||4)*2;
+ const privateRoom=document.querySelector('#roomPrivate').checked;
+ const pass=document.querySelector('#roomPassword').value.trim();
+ if(privateRoom&&!pass){document.querySelector('#roomNotice').textContent='กรุณาตั้งรหัสห้องส่วนตัวก่อน';return}
+ demoRooms.unshift({name,mode:selectedMode(),map:selectedMap,count:1,max,status:'🟦',locked:privateRoom,password:privateRoom?pass:''});
+ chosenRoom=0;renderRooms();closeRoomCreate();document.querySelector('#roomNotice').textContent='สร้างห้อง "'+name+'" แล้วในเดโมนี้ — กดเข้าเพื่อเริ่มแมตช์'; 
+}
+function joinSelectedRoom(){
+ const r=demoRooms[chosenRoom];if(!r){return}
+ if(r.count>=r.max){document.querySelector('#roomNotice').textContent='ห้องนี้เต็มแล้ว กรุณาเลือกห้องอื่น';return}
+ if(r.locked){const entered=prompt('ห้องนี้มีรหัสผ่าน กรุณาใส่รหัสห้อง');if(entered!==r.password){document.querySelector('#roomNotice').textContent='รหัสห้องไม่ถูกต้อง';return}}
+ document.querySelector('#roomNotice').textContent='กำลังเข้าห้อง '+r.name+' ('+r.map+')';
+ if(typeof startMatch==='function')startMatch();
+}
+document.querySelector('#openRooms')?.addEventListener('click',openRoomBrowser);
+document.querySelector('#roomBack')?.addEventListener('click',closeRoomBrowser);
+document.querySelector('#roomRefresh')?.addEventListener('click',()=>{renderRooms();document.querySelector('#roomNotice').textContent='รีเฟรชรายการห้องแล้ว (ข้อมูลห้องตัวอย่าง)'});
+document.querySelector('#roomRefreshBottom')?.addEventListener('click',()=>document.querySelector('#roomRefresh').click());
+document.querySelector('#roomCreateOpen')?.addEventListener('click',openRoomCreate);
+document.querySelector('#roomCreateCancel')?.addEventListener('click',closeRoomCreate);
+document.querySelector('#roomCreateConfirm')?.addEventListener('click',createRoom);
+document.querySelector('#roomJoin')?.addEventListener('click',joinSelectedRoom);
+document.querySelector('#roomQuick')?.addEventListener('click',()=>{chosenRoom=demoRooms.findIndex(r=>r.count<r.max&&!r.locked);if(chosenRoom<0)chosenRoom=0;renderRooms();joinSelectedRoom()});
+document.querySelectorAll('[data-map]').forEach(b=>b.addEventListener('click',()=>{selectedMap=b.dataset.map;document.querySelectorAll('[data-map]').forEach(x=>x.classList.toggle('active',x===b))}));
+renderRooms();
+
+const arsenalWeapons=[
+ {name:'GPAS-15 MSC',type:'อาวุธหลัก',shape:'╾━╾',power:88},
+ {name:'JackHammer',type:'อาวุธหลัก',shape:'━━╸',power:82},
+ {name:'Kel-Tec KSG-15',type:'อาวุธหลัก',shape:'╾━━',power:79},
+ {name:'M1887 SL',type:'อาวุธหลัก',shape:'╾━➤',power:76},
+ {name:'MK.46 Ext.',type:'อาวุธหลัก',shape:'╾╼━',power:89},
+ {name:'MK.46 SL',type:'อาวุธหลัก',shape:'╾╼━',power:85},
+ {name:'RPD',type:'อาวุธหลัก',shape:'╾━╾',power:91},
+ {name:'L86 LSW',type:'อาวุธหลัก',shape:'╾━╸',power:84},
+ {name:'Kiss S.V',type:'อาวุธรอง',shape:'⌁━',power:48},
+ {name:'HK 69',type:'อาวุธรอง',shape:'━╸',power:54},
+ {name:'K-400',type:'ระเบิด',shape:'●',power:70},
+ {name:'Smoke',type:'ระเบิด',shape:'▰',power:40}
+];
+let arsenalTab='อาวุธ',arsenalFilter='ทั้งหมด',arsenalSelected='GPAS-15 MSC';
+function drawArsenal(){
+ const grid=$('#aGrid');if(!grid)return;grid.innerHTML='';
+ let list=arsenalWeapons.filter(w=>arsenalFilter==='ทั้งหมด'||w.type===arsenalFilter);
+ if(arsenalTab==='ตัวละคร')list=[{name:'Assault Soldier',type:'ตัวละคร',shape:'♟',power:70},{name:'Recon Soldier',type:'ตัวละคร',shape:'♟',power:65},{name:'Heavy Soldier',type:'ตัวละคร',shape:'♟',power:90}];
+ if(arsenalTab==='ไอเท็ม')list=[{name:'ไอเทมเปลี่ยนชื่อ',type:'ไอเท็ม',shape:'🪪',power:100},{name:'First Aid Kit',type:'ไอเท็ม',shape:'✚',power:50},{name:'Armor Pack',type:'ไอเท็ม',shape:'▣',power:70},{name:'Smoke Grenade',type:'ไอเท็ม',shape:'◉',power:35}];
+ list.forEach(w=>{
+  const card=document.createElement('button');card.type='button';card.className='a-weapon'+(arsenalSelected===w.name?' selected':'');
+  card.innerHTML=`<div class="a-gunpic"><span class="shape">${w.shape}</span></div><div class="a-wname">${w.name}</div><div class="a-meta"><span style="font-size:12px;color:#b5a07a">⚙</span><div class="a-bar"><i style="width:${w.power}%;height:100%;display:block"></i></div><span style="font-size:12px">⌕</span></div>`;
+  card.addEventListener('click',()=>{arsenalSelected=w.name;$('#aStatus').textContent='เลือก: '+w.name;drawArsenal()});grid.appendChild(card);
+ });
+}
+function arsenalNotice(msg){$('#aStatus').textContent=msg}
+function arsenalRemove(){arsenalNotice('เลือกไอเท็มที่ต้องการลบก่อน')}
+function arsenalEquip(){arsenalNotice('เลือกอาวุธ: '+arsenalSelected+' • พร้อมเข้าสนาม')}
+
+// Name-change item prototype: saved locally in this browser.
+let renameCardCount=1;
+let playerDisplayName='GM_Pai';
+try{
+ // Developer profile preset for this build.
+ localStorage.setItem('pointStrikePlayerName','GM_Pai');
+ playerDisplayName='GM_Pai';
+ const savedCards=localStorage.getItem('pointStrikeRenameCards');
+ if(savedCards!==null) renameCardCount=Math.max(0,parseInt(savedCards,10)||0);
+}catch(e){}
+function refreshPlayerName(){
+ const nameEl=document.querySelector('.a-name');
+ if(nameEl) nameEl.textContent='👑 '+playerDisplayName+' [GM]';
+ const status=document.querySelector('#aStatus');
+ if(status) status.textContent='ผู้พัฒนา: '+playerDisplayName+' • ยศ GM • ไอเทมเปลี่ยนชื่อ '+renameCardCount+' ชิ้น';
+ const btn=document.querySelector('#useRenameItem');
+ if(btn){btn.disabled=renameCardCount<=0;btn.style.opacity=renameCardCount<=0?'.45':'1';btn.title=renameCardCount<=0?'ไม่มีไอเทมเปลี่ยนชื่อ':'ใช้ไอเทมเพื่อเปลี่ยนชื่อผู้เล่น'}
+}
+function useNameChangeItem(){
+ if(renameCardCount<=0){arsenalNotice('ไม่มีไอเทมเปลี่ยนชื่อ');return}
+ const entered=prompt('ไอเทมเปลี่ยนชื่อ\\nกรอกชื่อผู้เล่นใหม่ (2–16 ตัวอักษร):',playerDisplayName);
+ if(entered===null)return;
+ const name=entered.trim();
+ if(name.length<2||name.length>16){arsenalNotice('ชื่อต้องมีความยาว 2–16 ตัวอักษร');return}
+ if(/[<>]/.test(name)){arsenalNotice('ชื่อนี้มีอักขระที่ไม่อนุญาต');return}
+ if(name===playerDisplayName){arsenalNotice('ชื่อใหม่ต้องไม่ซ้ำกับชื่อเดิม');return}
+ playerDisplayName=name;
+ renameCardCount--;
+ try{
+  localStorage.setItem('pointStrikePlayerName',playerDisplayName);
+  localStorage.setItem('pointStrikeRenameCards',String(renameCardCount));
+ }catch(e){}
+ refreshPlayerName();
+ arsenalNotice('เปลี่ยนชื่อสำเร็จเป็น '+playerDisplayName+' • เหลือไอเทม '+renameCardCount+' ชิ้น');
+}
+refreshPlayerName();
+
+document.querySelectorAll('[data-atab]').forEach(b=>b.addEventListener('click',()=>{arsenalTab=b.dataset.atab;const renameBtn=document.querySelector('#useRenameItem');if(renameBtn)renameBtn.style.display=arsenalTab==='ไอเท็ม'?'inline-block':'none';document.querySelectorAll('[data-atab]').forEach(x=>x.classList.toggle('active',x===b));$('#aFilters').style.display=arsenalTab==='อาวุธ'?'grid':'none';arsenalFilter='ทั้งหมด';document.querySelectorAll('[data-afilter]').forEach(x=>x.classList.toggle('active',x.dataset.afilter==='ทั้งหมด'));drawArsenal()}));
+document.querySelectorAll('[data-afilter]').forEach(b=>b.addEventListener('click',()=>{arsenalFilter=b.dataset.afilter;document.querySelectorAll('[data-afilter]').forEach(x=>x.classList.toggle('active',x===b));drawArsenal()}));
+document.querySelectorAll('[data-anav]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-anav]').forEach(x=>x.classList.toggle('active',x===b));arsenalNotice('เปิดเมนู '+b.dataset.anav)}));
+drawArsenal();
+
+function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight)}
+addEventListener('resize',resize);hud();animate(performance.now());
+</script>
+<script>
+// v1.8: local shop/inventory/profile; multiplayer rooms remain local demo until a server is connected.
+const PS_CATALOG=[{id:'rename',name:'ไอเทมเปลี่ยนชื่อ',icon:'🪪',desc:'เปลี่ยนชื่อผู้เล่น',price:1500},{id:'medkit',name:'First Aid Kit',icon:'✚',desc:'ไอเทมฟื้นฟู (เดโม)',price:500},{id:'armor',name:'Armor Pack',icon:'🛡️',desc:'อุปกรณ์ป้องกัน (เดโม)',price:800},{id:'smoke',name:'Smoke Grenade',icon:'🌫️',desc:'ระเบิดควัน (เดโม)',price:650},{id:'ammo',name:'Ammo Pack',icon:'▤',desc:'แพ็กกระสุน (เดโม)',price:300},{id:'boost',name:'EXP Boost',icon:'⚡',desc:'บูสต์ EXP (เดโม)',price:1200}];
+let psPoints=21343,psInventory={rename:1,medkit:0,armor:0,smoke:0,ammo:0,boost:0},psKills=0,psMatches=0;
+try{let p=localStorage.getItem('pointStrikePoints');if(p!==null)psPoints=Math.max(0,parseInt(p)||0);let i=localStorage.getItem('pointStrikeInventory');if(i){let v=JSON.parse(i);PS_CATALOG.forEach(x=>psInventory[x.id]=Math.max(0,Number(v[x.id])||0))}psKills=Number(localStorage.getItem('pointStrikeKills')||0);psMatches=Number(localStorage.getItem('pointStrikeMatches')||0);if(localStorage.getItem('pointStrikeRenameCards')!==null)psInventory.rename=Math.max(psInventory.rename,Number(localStorage.getItem('pointStrikeRenameCards'))||0)}catch(e){}
+function psSave(){try{localStorage.setItem('pointStrikePoints',String(psPoints));localStorage.setItem('pointStrikeInventory',JSON.stringify(psInventory));localStorage.setItem('pointStrikeKills',String(psKills));localStorage.setItem('pointStrikeMatches',String(psMatches))}catch(e){}}
+function psEsc(v){return String(v??'ผู้เล่น').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function psOpen(mode){const h=document.querySelector('#psHub'),b=document.querySelector('#psHubBody'),t=document.querySelector('#psHubTitle');if(!h||!b)return;h.classList.add('open');let name=typeof playerDisplayName!=='undefined'?playerDisplayName:'ผู้เล่น';document.querySelector('#psPointBalance').textContent=psPoints.toLocaleString('th-TH');
+if(mode==='shop'){t.textContent='SHOP';b.innerHTML='<div class="ps-subtitle">ซื้ออุปกรณ์ด้วย Point ที่สะสม</div><div class="ps-grid">'+PS_CATALOG.map(x=>`<div class="ps-card"><div class="ps-icon">${x.icon}</div><div class="ps-name">${x.name}</div><div class="ps-desc">${x.desc}</div><b style="color:#ffd27b">${x.price.toLocaleString('th-TH')} Point</b><div style="margin-top:9px"><button class="ps-btn orange" data-buy="${x.id}">ซื้อไอเทม</button></div></div>`).join('')+'</div><div class="ps-actions"><button class="ps-btn" data-hub="inventory">เปิดคลังไอเทม</button></div>';b.querySelectorAll('[data-buy]').forEach(q=>q.onclick=()=>psBuy(q.dataset.buy))}
+else if(mode==='inventory'){t.textContent='INVENTORY';let owned=PS_CATALOG.filter(x=>psInventory[x.id]>0);b.innerHTML='<div class="ps-subtitle">คลังไอเทมของ '+psEsc(name)+'</div>'+(owned.length?'<div class="ps-grid">'+owned.map(x=>`<div class="ps-card"><div class="ps-icon">${x.icon}</div><div class="ps-name">${x.name}</div><div class="ps-desc">${x.desc}</div><b>จำนวน: ${psInventory[x.id]}</b>${x.id==='rename'?'<div style="margin-top:8px"><button class="ps-btn orange" id="psUseRename">ใช้ไอเทม</button></div>':''}</div>`).join('')+'</div>':'<div class="ps-empty">คลังยังว่าง ไปซื้อไอเทมที่ร้านค้า</div>')+'<div class="ps-actions"><button class="ps-btn orange" data-hub="shop">ไปที่ร้านค้า</button></div>';let u=b.querySelector('#psUseRename');if(u)u.onclick=()=>{if(psInventory.rename>0&&typeof useNameChangeItem==='function'){renameCardCount=psInventory.rename;useNameChangeItem();psInventory.rename=renameCardCount;psSave();psOpen('inventory')}else alert('ไม่มีไอเทมเปลี่ยนชื่อ')}}
+else{t.textContent='PROFILE';let rank='ฝึกหัด',exp=0;try{rank='GM';if(typeof totalExp!=='undefined')exp=totalExp}catch(e){}b.innerHTML=`<div class="ps-profile"><div class="ps-avatar">🪖</div><div><div class="ps-subtitle">โปรไฟล์ผู้เล่น</div><h2>${psEsc(name)}</h2><b style="color:#ffd27b">${psEsc(rank)}</b></div></div><div class="ps-statgrid" style="margin-top:12px"><div class="ps-stat">EXP<b>${Number(exp).toLocaleString('th-TH')}</b></div><div class="ps-stat">Point คงเหลือ<b>${psPoints.toLocaleString('th-TH')}</b></div><div class="ps-stat">กำจัดศัตรู<b>${psKills}</b></div><div class="ps-stat">เริ่มแมตช์<b>${psMatches}</b></div><div class="ps-stat">จำนวนไอเทม<b>${Object.values(psInventory).reduce((a,v)=>a+v,0)}</b></div><div class="ps-stat">บันทึกข้อมูล<b>เครื่องนี้</b></div></div><div class="ps-actions"><button class="ps-btn orange" data-hub="shop">ร้านค้า</button><button class="ps-btn" data-hub="inventory">คลังไอเทม</button></div>`}
+b.querySelectorAll('[data-hub]').forEach(q=>q.onclick=()=>psOpen(q.dataset.hub))}
+function psBuy(id){let x=PS_CATALOG.find(v=>v.id===id);if(!x)return;if(psPoints<x.price){alert('Point ไม่เพียงพอ');return}psPoints-=x.price;psInventory[id]=(psInventory[id]||0)+1;if(id==='rename')try{localStorage.setItem('pointStrikeRenameCards',String(psInventory.rename));renameCardCount=psInventory.rename}catch(e){}psSave();psOpen('shop')}
+document.querySelector('#openShop')?.addEventListener('click',()=>psOpen('shop'));document.querySelector('#openInventory')?.addEventListener('click',()=>psOpen('inventory'));document.querySelector('#openProfile')?.addEventListener('click',()=>psOpen('profile'));document.querySelector('#psHubClose')?.addEventListener('click',()=>document.querySelector('#psHub').classList.remove('open'));
+
+</script>
+</body>
+</html>
