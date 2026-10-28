@@ -1,0 +1,142 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>POINT STRIKE — Prototype v0.8 FPS Movement</title><style>
+*{box-sizing:border-box}body{margin:0;background:#0a111a;color:#edf2f5;font-family:Arial,sans-serif;overflow:hidden}button{background:#243748;color:white;border:1px solid #607483;border-radius:5px;padding:10px;font-weight:bold}button:active{filter:brightness(1.4)}.gold{color:#f5ce70}#lobby{height:100dvh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 60% 40%,#435460,#14222d 60%,#080d13)}header,footer{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#060b10dd;border-bottom:1px solid #34434e}header{height:58px}footer{height:30px;font-size:10px;color:#9aa9b5}.logo{font-size:25px;font-weight:1000;letter-spacing:2px;color:#f5ce70}.money{color:#ffe5a1;font-weight:bold;font-size:13px}.layout{flex:1;min-height:0;display:grid;grid-template-columns:150px 1fr 220px;gap:8px;padding:8px}.panel{background:#111c27eF;border:1px solid #354654;min-height:0}.panel h3{font-size:12px;letter-spacing:1px;color:#f5ce70;padding:12px;margin:0;border-bottom:1px solid #354654}.nav{display:flex;flex-direction:column}.nav button{border:0;border-bottom:1px solid #354654;border-radius:0;text-align:left;background:#111c27;padding:13px 10px;font-size:12px}.nav button.active{border-left:3px solid #f5ce70;background:#3b3b2d}.nav small{margin-top:auto;padding:12px;color:#8596a4;line-height:1.8}.center{position:relative;overflow:hidden;background:linear-gradient(180deg,#344653,#182631 68%,#11191e)}.center:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 42px,#ffffff06 43px 44px);pointer-events:none}.title{position:absolute;top:16px;left:16px;z-index:2}.title strong{font-size:26px;letter-spacing:2px}.title div{font-size:11px;color:#b4c2cb;margin-top:5px}.rank{position:absolute;right:15px;top:16px;text-align:right;color:#f5ce70;font-weight:bold;font-size:13px}.soldier{display:none}#charPreview{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}.center .title,.center .rank,.center .bottomrow{z-index:4}.head{position:absolute;top:9%;left:39%;width:25%;height:13%;border-radius:45%;background:linear-gradient(90deg,#76563e,#d0a27c,#805a41);z-index:1}.hair{position:absolute;z-index:3;top:5.5%;left:36%;width:31%;height:8%;background:linear-gradient(120deg,#080b0d,#25282a 55%,#080a0b);border-radius:65% 50% 20% 20%;clip-path:polygon(0 35%,15% 5%,35% 18%,55% 0,80% 15%,100% 38%,92% 85%,70% 58%,52% 72%,35% 48%,14% 85%)}.neckwrap{position:absolute;z-index:2;top:19%;left:34%;width:35%;height:9%;background:repeating-linear-gradient(0deg,#252b2a 0 4px,#424943 5px 8px);border-radius:7px;transform:rotate(-4deg)}.flagpatch{position:absolute;z-index:4;top:31%;left:38%;width:14%;height:4%;border:1px solid #151b1d;background:linear-gradient(to bottom,#b8202d 0 20%,#fff 20% 35%,#183b70 35% 65%,#fff 65% 80%,#b8202d 80%)}.pouch{position:absolute;z-index:4;top:44%;width:12%;height:8%;background:linear-gradient(90deg,#29372d,#56604a,#202a24);border:1px solid #151e18;border-radius:3px}.pouch.p1{left:35%}.pouch.p2{left:49%}.pouch.p3{left:63%}.belt{position:absolute;z-index:3;top:51%;left:31%;width:40%;height:3%;background:#202a23;border:1px solid #0b100d}.boots{position:absolute;top:89%;width:25%;height:8%;background:linear-gradient(#333b35,#111714);border:2px solid #090d0b;border-radius:5px 5px 8px 8px}.boots.a{left:20%}.boots.b{right:19%}.charlabel{position:absolute;z-index:5;top:1%;left:7%;padding:5px 8px;background:#07111dcc;border:1px solid #9f8955;color:#f5ce70;font-size:10px;font-weight:bold;letter-spacing:1px}.helmet{position:absolute;top:6%;left:31%;width:41%;height:13%;border-radius:50% 50% 12% 12%;background:linear-gradient(#818a7d,#354238);border:2px solid #1d2923}.bodyman{position:absolute;top:23%;left:24%;width:53%;height:33%;background:linear-gradient(90deg,#28382d,#64705a,#29372d);clip-path:polygon(20% 0,80% 0,100% 22%,83% 100%,17% 100%,0 22%)}.vest{position:absolute;z-index:2;top:27%;left:34%;width:35%;height:25%;background:repeating-linear-gradient(0deg,#3d4939 0 12px,#27352b 13px 16px);border:2px solid #1d2922}.arm{position:absolute;top:27%;width:18%;height:31%;background:linear-gradient(90deg,#354437,#66735b,#29372c);border-radius:12px}.arm.a{left:13%;transform:rotate(12deg)}.arm.b{right:12%;transform:rotate(-22deg)}.leg{position:absolute;top:54%;width:24%;height:39%;background:linear-gradient(90deg,#27352d,#59624c,#1b2923);border-radius:8px}.leg.a{left:27%}.leg.b{right:25%}.rifle{position:absolute;z-index:4;top:40%;left:27%;width:72%;height:6%;background:linear-gradient(#111,#646b68,#151b1b);border:2px solid #080b0c;transform:rotate(-16deg)}.rifle:after{content:"";position:absolute;left:24%;top:60%;width:12%;height:130%;background:#202826;transform:rotate(20deg)}.bottomrow{position:absolute;z-index:3;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;gap:8px}.bottomrow b{font-size:16px}.sub{font-size:10px;color:#aab8c4;margin-top:5px}.actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:end}.actions button{font-size:11px}.primary{background:linear-gradient(#f8d87e,#b77d24);color:#181818;border-color:#ffe8a6}.rightcontent{padding:8px;overflow:auto}.slot{display:grid;grid-template-columns:45px 1fr;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #354654}.icon{display:grid;place-items:center;height:36px;background:#263746;font-size:22px}.slot b{font-size:11px}.slot small{display:block;font-size:10px;color:#9eacb8;margin:4px 0}.slot button{padding:6px;font-size:10px}.shop{display:none;position:absolute;z-index:9;inset:0;background:#07101cf7;padding:18px;overflow:auto}.shopgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.item{padding:12px;background:#172431;border:1px solid #455969}.item p{font-size:11px;color:#aab8c4}.item b{display:block;margin-bottom:8px}#view{display:none;position:absolute;inset:0}canvas{width:100%;height:100%;display:block}#hud{display:none;position:absolute;inset:0;pointer-events:none;text-shadow:0 2px 3px black}.hudtop{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;font-size:12px;font-weight:bold}.hudbox{background:#07111ddd;border:1px solid #778997;padding:8px}.cross{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%)}.cross:before,.cross:after{content:"";position:absolute;background:white}.gunhand{position:absolute;right:23%;bottom:0;width:19%;height:40%;background:linear-gradient(90deg,#252b28,#69705d 45%,#343a31);border:2px solid #111713;border-radius:35% 35% 12% 12%;transform:rotate(-17deg);transform-origin:bottom center}.gunhand:after{content:"";position:absolute;right:-40%;top:14%;width:70%;height:30%;background:linear-gradient(#b28a69,#6f503d);border:1px solid #38291f;border-radius:40%;transform:rotate(22deg)}#viewgun{transform-origin:80% 90%;transition:transform .08s ease-out}#viewgun .mag{position:absolute;right:43%;bottom:0;width:13%;height:33%;background:linear-gradient(90deg,#101514,#3d4541,#101514);border:2px solid #090d0c;transform:rotate(-6deg);border-radius:0 0 5px 5px}#reloadveil{display:none;position:absolute;left:50%;bottom:18%;transform:translateX(-50%);background:#07111ddd;border:1px solid #9aaab5;padding:8px 14px;font-size:12px;font-weight:bold;color:#ffe5a1;white-space:nowrap}#reloadbar{height:4px;background:#e6bf61;width:0;margin-top:6px}@keyframes recoil{0%{transform:translate(0,0) rotate(0)}45%{transform:translate(-7px,10px) rotate(2deg)}100%{transform:translate(0,0) rotate(0)}}@keyframes reloadGun{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(18px) rotate(8deg)}60%{transform:translateY(25px) rotate(12deg)}100%{transform:translateY(0) rotate(0)}}.shooting{animation:recoil .16s ease-out}.reloading{animation:reloadGun 1.35s ease-in-out}.cross:before{left:9px;width:2px;height:20px}.cross:after{top:9px;height:2px;width:20px}#joy{position:absolute;left:20px;bottom:25px;width:112px;height:112px;border:2px solid #ffffff66;border-radius:50%;background:#07111d77;pointer-events:auto;touch-action:none}#nub{position:absolute;left:32px;top:32px;width:44px;height:44px;border-radius:50%;background:#dce6ef66;border:1px solid white}#fire,#reload,#exit{position:absolute;pointer-events:auto;touch-action:manipulation}#fire{right:20px;bottom:38px;border-radius:50%;width:66px;height:66px;background:#a72d2dcc;border:2px solid white}#reload{right:95px;bottom:120px;font-size:10px}#exit{right:10px;top:56px}#message{display:none;position:absolute;top:25%;left:50%;transform:translateX(-50%);background:#101923eF;padding:10px;border:1px solid #778997}
+@media(max-width:650px){.layout{grid-template-columns:100px 1fr;padding:5px;gap:5px}.right{display:none}.logo{font-size:19px}.money{font-size:11px}.nav button{font-size:10px;padding:12px 6px}.soldier{height:68%;width:180px}.title{top:10px;left:10px}.title strong{font-size:19px}.bottomrow{left:7px;right:7px;bottom:7px}.actions button{padding:8px 6px;font-size:10px}}@media(orientation:portrait){header:after{content:"หมุน iPhone แนวนอนเพื่อเล่น";font-size:10px;color:#f5ce70;position:absolute;top:58px;left:8px}.layout{padding-top:22px}}
+</style></head><body>
+<div id="lobby"><header><div class="logo">POINT STRIKE</div><div class="money">◈ <span id="cash">12,500</span> CR</div><button onclick="openShop()">ร้านค้า</button></header><main class="layout">
+<nav class="panel nav"><h3>MAIN MENU</h3><button class="active" onclick="showTab('OPERATOR','TACTICAL UNIT • FIELD READY',this)">▣ ล็อบบี้</button><button onclick="showTab('WEAPON ARSENAL','เลือกอาวุธที่เป็นเจ้าของ',this)">▤ คลังอาวุธ</button><button onclick="showTab('FIELD OPERATOR','TACTICAL ASSAULT UNIT',this)">♟ ตัวละคร</button><button onclick="openShop()">◈ ร้านค้า</button><button onclick="startGame()">▶ เริ่มฝึกยิง</button><small>SERVER: LOCAL TRAINING<br>STATUS: READY<br>BUILD 0.8 FPS CAMERA CONTROLS</small></nav>
+<section class="panel center"><div class="title"><strong id="title">OPERATOR</strong><div id="subtitle">TACTICAL UNIT • FIELD READY</div></div><canvas id="charPreview" aria-label="โมเดล 3D พยัคฆ์"></canvas><div class="rank">RANK 03<br><span style="font-size:10px;color:#c4cfd7">SERGEANT</span></div><div class="soldier"><div class="charlabel">พยัคฆ์ • ASSAULT</div><div class="helmet" style="display:none"></div><div class="head"></div><div class="hair"></div><div class="neckwrap"></div><div class="arm a"></div><div class="arm b"></div><div class="bodyman"></div><div class="vest"></div><div class="flagpatch"></div><div class="pouch p1"></div><div class="pouch p2"></div><div class="pouch p3"></div><div class="belt"></div><div class="leg a"></div><div class="leg b"></div><div class="boots a"></div><div class="boots b"></div><div class="rifle"></div></div><div class="bottomrow"><div><b id="equipped">M4A1 CARBINE</b><div class="sub" id="stat">5.56×45mm • ASSAULT RIFLE • EQUIPPED</div></div><div class="actions"><button onclick="showTab('WEAPON ARSENAL','เลือกอาวุธที่เป็นเจ้าของ')">คลังปืน</button><button onclick="openShop()">ซื้ออุปกรณ์</button><button class="primary" onclick="startGame()">เริ่มฝึกยิง ▶</button></div></div></section>
+<aside class="panel right"><h3>LOADOUT / EQUIPMENT</h3><div class="rightcontent" id="loadout"></div></aside></main><footer><span>POINT STRIKE • FPS PROTOTYPE • FPS CONTROLS v0.8</span><span>TRAINING MODE • MOBILE READY • v0.8</span></footer></div>
+<div id="view"><canvas id="game"></canvas></div><div id="hud"><div class="hudtop"><div class="hudbox">TRAINING RANGE • <span id="targets">TARGETS 0/8</span></div><div class="hudbox">HP <span id="hp">100</span>　<span id="ammo">30 / 120</span></div></div><div class="cross" id="crosshair"></div><div id="hitmark" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:30px;color:#ffdf76;font-weight:900">×</div><div id="viewgun" style="position:absolute;right:7%;bottom:-2%;width:34%;height:28%;pointer-events:none;filter:drop-shadow(0 5px 8px #000b);"><div style="position:absolute;right:5%;bottom:10%;width:65%;height:24%;background:linear-gradient(#59615f,#161c1c 45%,#090d0e);border:2px solid #080a0b;transform:rotate(-10deg);border-radius:3px"></div><div style="position:absolute;right:45%;bottom:14%;width:18%;height:45%;background:linear-gradient(90deg,#1b211e,#566052,#151a17);transform:rotate(-10deg);clip-path:polygon(15% 0,100% 0,75% 100%,0 90%)"></div><div style="position:absolute;right:12%;bottom:29%;width:48%;height:5%;background:#090d0e;transform:rotate(-10deg)"></div><div class="mag"></div><div class="gunhand"></div></div><div id="joy"><div id="nub"></div></div><button id="fire">FIRE</button><button id="reload">RELOAD</button><div id="reloadveil">RELOADING...<div id="reloadbar"></div></div><div id="movehint">ลากจอยสติ๊กเพื่อเดิน • ลากหน้าจอเพื่อหันมุมมอง</div><button id="exit" onclick="exitGame()">✕ ล็อบบี้</button><div id="message"></div></div>
+<div id="shop" class="shop"><button style="float:right" onclick="closeShop()">✕ ปิด</button><h2 class="gold">TACTICAL ARMORY / ร้านค้า</h2><p style="color:#aab8c4">เครดิตจำลองในเกม ไม่มีเงินจริง</p><div class="shopgrid" id="shopgrid"></div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const W=[{id:'m4',name:'M4A1 CARBINE',type:'ASSAULT RIFLE',cal:'5.56×45mm',price:0,mag:30,owned:true,damage:25},{id:'ak',name:'AK-47',type:'ASSAULT RIFLE',cal:'7.62×39mm',price:4200,mag:30,owned:false,damage:34},{id:'k1',name:'K-1',type:'SUBMACHINE GUN',cal:'5.56×45mm',price:2800,mag:35,owned:false,damage:20},{id:'pistol',name:'MK23 PISTOL',type:'SIDEARM',cal:'.45 ACP',price:1200,mag:12,owned:true,damage:20},{id:'knife',name:'FIELD KNIFE',type:'MELEE',cal:'STEEL',price:500,mag:0,owned:true,damage:50}];
+let cash=12500,eq='m4',scene,camera,renderer,targets=[],running=false,ammo=30,reserve=120,kills=0,yaw=0,pitch=0,joy={x:0,y:0},keys={},lastShot=0,raf=0,isReloading=false,shootTimer=0,lookTouch=null,moveSpeed=3.2,playerX=0,playerZ=0;const $=x=>document.getElementById(x);
+
+function make3DPhayakh(){
+ const c=$('charPreview');
+ const r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});
+ r.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ r.setSize(c.clientWidth||500,c.clientHeight||500,false);
+ r.outputColorSpace=THREE.SRGBColorSpace;
+ const s=new THREE.Scene();
+ const cam=new THREE.PerspectiveCamera(32,1,.1,100);
+ cam.position.set(4.6,3.1,8.2);cam.lookAt(0,1.55,0);
+ s.add(new THREE.HemisphereLight(0xdce8f0,0x252d25,2.1));
+ const key=new THREE.DirectionalLight(0xffe1b2,3.0);key.position.set(4,8,6);s.add(key);
+ const rim=new THREE.DirectionalLight(0x7da9d5,2.0);rim.position.set(-5,4,-4);s.add(rim);
+ const mat=(color,roughness=.82,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+ const uniform=mat(0x303a32),uniform2=mat(0x465143),black=mat(0x151a1b),vest=mat(0x353e32),skin=mat(0xc89572),hair=mat(0x111416),metal=mat(0x202729,.4,.55),gold=mat(0xb39a57,.5,.45);
+ const root=new THREE.Group();s.add(root);
+ function box(parent,x,y,z,w,h,d,m,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);parent.add(o);return o}
+ function ball(parent,x,y,z,rx,ry,rz,m){const o=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),m);o.position.set(x,y,z);o.scale.set(rx,ry,rz);parent.add(o);return o}
+ function limb(parent,a,b,r1,r2,m){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va);const o=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,delta.length(),10),m);o.position.copy(va.add(vb).multiplyScalar(.5));o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());parent.add(o);return o}
+ // Legs, boots and tactical trousers
+ box(root,-.19,.72,0,.24,.9,.28,uniform2,0,0,-.035);
+ box(root,.19,.72,0,.24,.9,.28,uniform2,0,0,.035);
+ box(root,-.2,.2,.06,.28,.18,.42,black,0,0,-.04);
+ box(root,.2,.2,.06,.28,.18,.42,black,0,0,.04);
+ // torso and neck
+ box(root,0,1.48,0,.68,.76,.34,uniform,0,0,0);
+ box(root,0,1.88,0,.2,.22,.2,skin);
+ // head and swept black hair
+ ball(root,0,2.13,0,.22,.29,.2,skin);
+ ball(root,0,2.32,-.015,.235,.16,.215,hair);
+ box(root,-.09,2.22,.185,.07,.035,.018,black);
+ box(root,.09,2.22,.185,.07,.035,.018,black);
+ // scarf and plate carrier
+ box(root,0,1.84,.05,.43,.16,.4,black,.08,0,0);
+ box(root,0,1.48,.205,.53,.53,.13,vest);
+ box(root,0,1.69,.278,.37,.12,.025,uniform2);
+ // flag patch with red/white/blue bands
+ box(root,-.19,1.68,.286,.105,.07,.018,mat(0xffffff));
+ box(root,-.19,1.68,.298,.105,.023,.012,mat(0x21457b));
+ box(root,-.19,1.704,.298,.105,.013,.012,mat(0xc42b35));
+ // molle pouches and belt
+ for(let x of [-.19,-.065,.065,.19])box(root,x,1.36,.29,.095,.15,.07,uniform2);
+ box(root,0,1.12,.02,.7,.08,.38,black);
+ // arms bent forward
+ limb(root,[-.38,1.75,0],[-.48,1.43,.22],.12,.095,uniform);
+ limb(root,[.38,1.75,0],[.28,1.52,.3],.12,.095,uniform);
+ ball(root,-.48,1.42,.23,.09,.08,.09,skin);
+ ball(root,.28,1.51,.31,.09,.08,.09,skin);
+ box(root,-.48,1.42,.23,.16,.11,.13,black);
+ box(root,.28,1.51,.31,.16,.11,.13,black);
+ // M4-style rifle held across chest (fictional visual prop)
+ const rifle=new THREE.Group();root.add(rifle);rifle.position.set(.02,1.55,.42);rifle.rotation.z=-.16;
+ box(rifle,0,0,0,.78,.075,.09,metal);
+ box(rifle,-.12,-.075,0,.19,.12,.1,black,0,0,-.25);
+ box(rifle,.27,.005,0,.28,.045,.06,black);
+ box(rifle,.02,.065,0,.14,.035,.05,black);
+ box(rifle,-.02,-.12,.015,.08,.18,.07,black,0,0,-.12);
+ box(rifle,-.4,0,0,.13,.1,.1,black);
+ // backpack and shoulder straps
+ box(root,0,1.57,-.22,.4,.48,.18,uniform2);
+ box(root,-.2,1.63,.12,.07,.4,.07,black,0,0,-.12);
+ box(root,.2,1.63,.12,.07,.4,.07,black,0,0,.12);
+ // small shoulder insignia
+ box(root,-.37,1.75,.015,.12,.11,.03,gold);
+ root.position.y=-.05;
+ function resize(){const w=c.clientWidth||500,h=c.clientHeight||500;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+ window.addEventListener('resize',resize);resize();
+ let t=0,dragging=false,lastX=0,spin=0;
+ // Touch/mouse drag rotates the 3D character in the lobby.
+ c.style.pointerEvents='auto';
+ c.style.touchAction='pan-y';
+ c.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;spin=root.rotation.y;try{c.setPointerCapture(e.pointerId)}catch(_){}});
+ c.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lastX;lastX=e.clientX;spin+=dx*.012;root.rotation.y=spin;});
+ c.addEventListener('pointerup',()=>{dragging=false});
+ c.addEventListener('pointercancel',()=>{dragging=false});
+ function animatePreview(){
+   requestAnimationFrame(animatePreview);
+   if(!$('lobby')||$('lobby').style.display==='none')return;
+   t+=.025;
+   if(!dragging)root.rotation.y+=(Math.sin(t*.5)*.16-root.rotation.y)*.018;
+   root.position.y=-.05+Math.sin(t*1.7)*.018;
+   r.render(s,cam)
+ }
+ animatePreview();
+}
+make3DPhayakh();
+
+function refresh(){$('cash').textContent=cash.toLocaleString();let w=W.find(x=>x.id===eq);$('equipped').textContent=w.name;$('stat').textContent=w.cal+' • '+w.type+' • EQUIPPED';$('loadout').innerHTML=W.filter(x=>x.owned).map(x=>`<div class="slot"><div class="icon">${x.id==='knife'?'⚔':'▰'}</div><div><b>${x.name}</b><small>${x.type}</small><button onclick="equip('${x.id}')">${eq===x.id?'ติดตั้งแล้ว':'ติดตั้ง'}</button></div></div>`).join('')}
+window.equip=id=>{if(!W.find(x=>x.id===id).owned)return;eq=id;refresh()};
+window.showTab=(a,b,btn)=>{$('title').textContent=a;$('subtitle').textContent=b;document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active')};
+window.openShop=()=>{$('shop').style.display='block';$('shopgrid').innerHTML=W.map(w=>`<div class="item"><b>${w.name}</b><small>${w.type}</small><p>${w.cal}<br>Damage: ${w.damage}</p>${w.owned?'<button disabled>OWNED</button>':`<button onclick="buy('${w.id}')">ซื้อ ${w.price.toLocaleString()} CR</button>`}</div>`).join('')};window.closeShop=()=>$('shop').style.display='none';window.buy=id=>{let w=W.find(x=>x.id===id);if(cash<w.price){alert('เครดิตไม่พอ');return}cash-=w.price;w.owned=true;refresh();openShop()};
+window.startGame=()=>{if(!renderer)init3D();$('lobby').style.display='none';$('view').style.display='block';$('hud').style.display='block';$('shop').style.display='none';running=true;ammo=W.find(x=>x.id===eq).mag||12;reserve=120;kills=0;spawn();hud();loop()};
+window.exitGame=()=>{running=false;cancelAnimationFrame(raf);$('view').style.display='none';$('hud').style.display='none';$('lobby').style.display='flex'};
+function hud(){$('ammo').textContent=`${ammo} / ${reserve}`;$('targets').textContent=`TARGETS ${kills}/8`}
+function init3D(){scene=new THREE.Scene();scene.background=new THREE.Color(0x879ba7);scene.fog=new THREE.Fog(0x879ba7,25,100);camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,200);camera.position.set(0,1.7,7);renderer=new THREE.WebGLRenderer({canvas:$('game'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);scene.add(new THREE.HemisphereLight(0xdce8f0,0x38422e,2));let sun=new THREE.DirectionalLight(0xffe5be,2.4);sun.position.set(8,15,6);scene.add(sun);const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.85});let ground=new THREE.Mesh(new THREE.PlaneGeometry(160,160),mat(0x656d62));ground.rotation.x=-Math.PI/2;scene.add(ground);
+for(let i=0;i<20;i++){let x=(i%5-2)*8,z=-8-Math.floor(i/5)*10;let b=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,2),mat(i%2?0x777d7a:0x5b645f));b.position.set(x,1.25,z);scene.add(b);let roof=new THREE.Mesh(new THREE.BoxGeometry(3.3,.2,2.3),mat(0x343d3b));roof.position.set(x,2.6,z);scene.add(roof)}
+window.addEventListener('resize',()=>{if(camera){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='r')reload()});document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);$('game').addEventListener('click',()=>{if(running&&innerWidth>700)shoot()});
+let touch=null;$('view').addEventListener('touchstart',e=>{if(e.target.closest('button')||e.target.closest('#joy'))return;let t=e.changedTouches[0];touch={x:t.clientX,y:t.clientY}},{passive:true});$('view').addEventListener('touchmove',e=>{if(!running||!touch)return;let t=e.changedTouches[0];yaw-=(t.clientX-touch.x)*.004;pitch=Math.max(-1.2,Math.min(1.2,pitch-(t.clientY-touch.y)*.004));touch={x:t.clientX,y:t.clientY}},{passive:true});$('view').addEventListener('touchend',()=>touch=null,{passive:true})}
+function spawn(){targets.forEach(t=>scene.remove(t));targets=[];for(let i=0;i<8;i++){let g=new THREE.Group();let body=new THREE.Mesh(new THREE.BoxGeometry(.65,1.05,.35),new THREE.MeshStandardMaterial({color:0x9e302a}));body.position.y=.85;g.add(body);let head=new THREE.Mesh(new THREE.SphereGeometry(.23,12,10),new THREE.MeshStandardMaterial({color:0xc2a080}));head.position.y=1.55;g.add(head);g.position.set((i%4-1.5)*3,0,-10-Math.floor(i/4)*9);scene.add(g);targets.push(g)}}
+function gunSound(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(115,c.currentTime);o.frequency.exponentialRampToValueAtTime(42,c.currentTime+.09);g.gain.setValueAtTime(.16,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.13);setTimeout(()=>c.close(),250)}catch(e){}}
+function shoot(){if(isReloading||performance.now()-lastShot<180)return;lastShot=performance.now();if(!ammo){msg('กระสุนหมด • กด RELOAD');return}gunSound();const vg=$('viewgun');vg.classList.remove('shooting');void vg.offsetWidth;vg.classList.add('shooting');clearTimeout(shootTimer);shootTimer=setTimeout(()=>vg.classList.remove('shooting'),180);ammo--;hud();let ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(0,0),camera);let hit=ray.intersectObjects(targets.flatMap(t=>t.children),false)[0];if(hit){let i=targets.findIndex(t=>t.children.includes(hit.object));if(i>=0){$('hitmark').style.display='block';setTimeout(()=>$('hitmark').style.display='none',180);scene.remove(targets[i]);targets.splice(i,1);kills++;cash+=100;refresh();hud();msg('TARGET ELIMINATED +100 CR');if(kills===8){cash+=500;refresh();msg('TRAINING COMPLETE +500 CR')}}}}
+function msg(t){$('message').textContent=t;$('message').style.display='block';setTimeout(()=>$('message').style.display='none',1200)}
+function reload(){
+ if(isReloading)return;
+ const magSize=W.find(x=>x.id===eq).mag||12;
+ const need=magSize-ammo;
+ if(need<=0){msg('กระสุนเต็มแล้ว');return}
+ if(reserve<=0){msg('กระสุนสำรองหมด');return}
+ isReloading=true;
+ const vg=$('viewgun'),veil=$('reloadveil'),bar=$('reloadbar'),btn=$('reload');
+ vg.classList.remove('shooting');vg.classList.add('reloading');
+ veil.style.display='block';bar.style.width='0%';btn.disabled=true;btn.textContent='...';
+ const start=performance.now(),duration=1350;
+ function tick(now){
+   if(!isReloading)return;
+   const pct=Math.min(100,((now-start)/duration)*100);
+   bar.style.width=pct+'%';
+   if(pct<100){requestAnimationFrame(tick);return}
+   const amount=Math.min(need,reserve);ammo+=amount;reserve-=amount;hud();
+   isReloading=false;vg.classList.remove('reloading');veil.style.display='none';btn.disabled=false;btn.textContent='RELOAD';
+   msg('เปลี่ยนแม็กกาซีนสำเร็จ');
+ }
+ requestAnimationFrame(tick);
+ }$('fire').addEventListener('pointerdown',e=>{e.preventDefault();shoot()});$('reload').addEventListener('click',reload);
+let je=$('joy'),nub=$('nub'),ja=false;je.addEventListener('pointerdown',e=>{ja=true;je.setPointerCapture(e.pointerId);move(e)});je.addEventListener('pointermove',e=>{if(ja)move(e)});function move(e){let r=je.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y),m=34;if(l>m){x=x/l*m;y=y/l*m}nub.style.left=32+x+'px';nub.style.top=32+y+'px';joy.x=x/m;joy.y=y/m}function reset(){ja=false;joy.x=joy.y=0;nub.style.left='32px';nub.style.top='32px'}je.addEventListener('pointerup',reset);je.addEventListener('pointercancel',reset);
+function loop(){if(!running)return;raf=requestAnimationFrame(loop);targets.forEach((t,i)=>{if(t.userData.baseX===undefined)t.userData.baseX=t.position.x;t.position.x=t.userData.baseX+Math.sin(performance.now()*.0012+i*1.4)*.75});camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;let f=(keys.w?1:0)-(keys.s?1:0)-joy.y,r=(keys.d?1:0)-(keys.a?1:0)+joy.x,s=.11;camera.position.x+=Math.sin(yaw)*f*s+Math.cos(yaw)*r*s;camera.position.z+=Math.cos(yaw)*f*s-Math.sin(yaw)*r*s;camera.position.x=Math.max(-25,Math.min(25,camera.position.x));camera.position.z=Math.max(-45,Math.min(12,camera.position.z));camera.position.y=1.7;renderer.render(scene,camera)}
+refresh();
+</script></body></html>
